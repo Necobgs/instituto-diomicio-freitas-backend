@@ -1,19 +1,12 @@
-import { SetMetadata } from "@nestjs/common";
+import { FilterInfo } from "./interface/filter_info.interface";
 
 
-export const KEY_FILTER = 'filter';
+export const KEY_FILTER = Symbol('filter_info');
 
-const FILTER_OPTIONS = [
-    'greater then or equal',
-    'lower then or equal',
-    'greater then',
-    'lower then',
-    'equals',
-    'contains',
-    'not contains',
-    'not equal'
-] as const;
+export const Filter = <Entity>(filterInfo:FilterInfo<Entity>) => {
+    return (target:Object,propertyKey: string | symbol) => {
 
-export type FilterOption = typeof FILTER_OPTIONS[number];
+        Reflect.defineMetadata(KEY_FILTER,filterInfo,target, propertyKey)
 
-export const Filter = (option:FilterOption) => SetMetadata(KEY_FILTER,option)
+    }
+};
