@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { MonitoringService } from './monitoring.service';
 import { CreateMonitoringDto } from './dto/create-monitoring.dto';
 import { UpdateMonitoringDto } from './dto/update-monitoring.dto';
+import { FilterDto } from '../shared/filter/filter-dto';
 
 @Controller('monitoring')
 export class MonitoringController {
@@ -13,13 +14,13 @@ export class MonitoringController {
   }
 
   @Get()
-  findAll() {
-    return this.monitoringService.findAll();
+  findAll(@Query() dto: FilterDto) {
+    return this.monitoringService.findAll(dto);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.monitoringService.findOne(+id);
+    return this.monitoringService.findOneBy('id', +id);
   }
 
   @Patch(':id')

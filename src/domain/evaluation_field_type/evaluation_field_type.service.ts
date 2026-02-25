@@ -1,26 +1,39 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateEvaluationFieldTypeDto } from './dto/create-evaluation_field_type.dto';
 import { UpdateEvaluationFieldTypeDto } from './dto/update-evaluation_field_type.dto';
+import { FilterDto } from '../shared/filter/filter-dto';
+import { EvaluationFieldTypeRepository } from './evaluation_field_type.repository';
+import { EvaluationFieldType } from './entities/evaluation_field_type.entity';
 
 @Injectable()
 export class EvaluationFieldTypeService {
-  create(createEvaluationFieldTypeDto: CreateEvaluationFieldTypeDto) {
-    return 'This action adds a new evaluationFieldType';
+  constructor(
+    private readonly repository: EvaluationFieldTypeRepository,
+  ) {}
+
+  async create(createEvaluationFieldTypeDto: CreateEvaluationFieldTypeDto) {
+    const et = this.repository.create(createEvaluationFieldTypeDto as any);
+    return await this.repository.save(et);
   }
 
-  findAll() {
-    return `This action returns all evaluationFieldType`;
+  async findAll(dto: FilterDto) {
+    return await this.repository.filterAll(dto);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} evaluationFieldType`;
+  async findOneBy<T extends keyof EvaluationFieldType>(key: T, value: EvaluationFieldType[T]) {
+    const item = await this.repository.findOneBy({ [key]: value });
+    if (!item) throw new NotFoundException(`Tipo de campo de avaliação com ${key} ${value} não encontrado`);
+    return item;
   }
 
-  update(id: number, updateEvaluationFieldTypeDto: UpdateEvaluationFieldTypeDto) {
-    return `This action updates a #${id} evaluationFieldType`;
+  async update(id: number, updateEvaluationFieldTypeDto: UpdateEvaluationFieldTypeDto) {
+    const et = await this.findOneBy('id', id);
+    Object.assign(et, updateEvaluationFieldTypeDto);
+    return await this.repository.save(et);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} evaluationFieldType`;
+  async remove(id: number) {
+    const item = await this.findOneBy('id', id);
+    return await this.repository.softRemove(item);
   }
 }

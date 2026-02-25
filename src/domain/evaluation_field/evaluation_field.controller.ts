@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { EvaluationFieldService } from './evaluation_field.service';
 import { CreateEvaluationFieldDto } from './dto/create-evaluation_field.dto';
 import { UpdateEvaluationFieldDto } from './dto/update-evaluation_field.dto';
+import { FilterDto } from '../shared/filter/filter-dto';
 
 @Controller('evaluation-field')
 export class EvaluationFieldController {
@@ -13,13 +14,13 @@ export class EvaluationFieldController {
   }
 
   @Get()
-  findAll() {
-    return this.evaluationFieldService.findAll();
+  findAll(@Query() dto: FilterDto) {
+    return this.evaluationFieldService.findAll(dto);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.evaluationFieldService.findOne(+id);
+    return this.evaluationFieldService.findOneBy('id', +id);
   }
 
   @Patch(':id')

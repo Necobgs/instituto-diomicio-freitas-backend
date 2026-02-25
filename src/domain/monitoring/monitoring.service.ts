@@ -1,26 +1,39 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateMonitoringDto } from './dto/create-monitoring.dto';
 import { UpdateMonitoringDto } from './dto/update-monitoring.dto';
+import { FilterDto } from '../shared/filter/filter-dto';
+import { MonitoringRepository } from './monitoring.repository';
+import { Monitoring } from './entities/monitoring.entity';
 
 @Injectable()
 export class MonitoringService {
-  create(createMonitoringDto: CreateMonitoringDto) {
-    return 'This action adds a new monitoring';
+  constructor(
+    private readonly repository: MonitoringRepository,
+  ) {}
+
+  async create(createMonitoringDto: CreateMonitoringDto) {
+    const m = this.repository.create(createMonitoringDto as any);
+    return await this.repository.save(m);
   }
 
-  findAll() {
-    return `This action returns all monitoring`;
+  async findAll(dto: FilterDto) {
+    return await this.repository.filterAll(dto);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} monitoring`;
+  async findOneBy<T extends keyof Monitoring>(key: T, value: Monitoring[T]) {
+    const item = await this.repository.findOneBy({ [key]: value });
+    if (!item) throw new NotFoundException(`Monitoramento com ${key} ${value} não encontrado`);
+    return item;
   }
 
-  update(id: number, updateMonitoringDto: UpdateMonitoringDto) {
-    return `This action updates a #${id} monitoring`;
+  async update(id: number, updateMonitoringDto: UpdateMonitoringDto) {
+    const m = await this.findOneBy('id', id);
+    Object.assign(m, updateMonitoringDto);
+    return await this.repository.save(m);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} monitoring`;
+  async remove(id: number) {
+    const item = await this.findOneBy('id', id);
+    return await this.repository.softRemove(item);
   }
 }

@@ -1,19 +1,20 @@
-import { Column, Entity } from "typeorm";
-import { BaseEntity } from "../../shared/base-entity";
+import { Column, Entity, OneToMany } from "typeorm";
+import { AggregateRoot } from "../../shared/aggregate-root";
+import { Student } from "../../student/entities/student.entity";
 
 @Entity({name:'enterprises'})
-export class Enterprise extends BaseEntity{
+export class Enterprise extends AggregateRoot{
 
     @Column()
-    name:string;
+    name!:string;
 
     @Column()
-    cnpj: string;
+    cnpj!: string;
 
     @Column()
-    phone: string;
+    phone!: string;
 
-    @Column()
-    enabled: boolean
+    @OneToMany(() => Student, student => student.enterprise)
+    students?: Student[];
 
 }

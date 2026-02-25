@@ -1,26 +1,39 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateEvaluationFieldDto } from './dto/create-evaluation_field.dto';
 import { UpdateEvaluationFieldDto } from './dto/update-evaluation_field.dto';
+import { FilterDto } from '../shared/filter/filter-dto';
+import { EvaluationFieldRepository } from './evaluation_field.repository';
+import { EvaluationField } from './entities/evaluation_field.entity';
 
 @Injectable()
 export class EvaluationFieldService {
-  create(createEvaluationFieldDto: CreateEvaluationFieldDto) {
-    return 'This action adds a new evaluationField';
+  constructor(
+    private readonly repository: EvaluationFieldRepository,
+  ) {}
+
+  async create(createEvaluationFieldDto: CreateEvaluationFieldDto) {
+    const ef = this.repository.create(createEvaluationFieldDto as any);
+    return await this.repository.save(ef);
   }
 
-  findAll() {
-    return `This action returns all evaluationField`;
+  async findAll(dto: FilterDto) {
+    return await this.repository.filterAll(dto);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} evaluationField`;
+  async findOneBy<T extends keyof EvaluationField>(key: T, value: EvaluationField[T]) {
+    const item = await this.repository.findOneBy({ [key]: value });
+    if (!item) throw new NotFoundException(`Campo de avaliação com ${key} ${value} não encontrado`);
+    return item;
   }
 
-  update(id: number, updateEvaluationFieldDto: UpdateEvaluationFieldDto) {
-    return `This action updates a #${id} evaluationField`;
+  async update(id: number, updateEvaluationFieldDto: UpdateEvaluationFieldDto) {
+    const ef = await this.findOneBy('id', id);
+    Object.assign(ef, updateEvaluationFieldDto);
+    return await this.repository.save(ef);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} evaluationField`;
+  async remove(id: number) {
+    const item = await this.findOneBy('id', id);
+    return await this.repository.softRemove(item);
   }
 }

@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { EnterpriseService } from './enterprise.service';
 import { CreateEnterpriseDto } from './dto/create-enterprise.dto';
 import { UpdateEnterpriseDto } from './dto/update-enterprise.dto';
+import { FilterDto } from '../shared/filter/filter-dto';
 
 @Controller('enterprise')
 export class EnterpriseController {
@@ -13,13 +14,13 @@ export class EnterpriseController {
   }
 
   @Get()
-  findAll() {
-    return this.enterpriseService.findAll();
+  findAll(@Query() dto: FilterDto) {
+    return this.enterpriseService.findAll(dto);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.enterpriseService.findOne(+id);
+    return this.enterpriseService.findOneBy('id', +id);
   }
 
   @Patch(':id')

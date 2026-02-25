@@ -1,42 +1,44 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { FilterUser } from './dto/filter-user.dto';
-import { InjectRepository } from '@nestjs/typeorm';
+import { UserRepository } from './user.repository';
+import { FilterDto } from '../shared/filter/filter-dto';
 import { User } from './entities/user.entity';
-import { Repository } from 'typeorm';
-import { FilterEngine } from '../shared/filter/filter_engine';
 
 @Injectable()
 export class UserService {
 
-  private readonly filterEngine : FilterEngine<User>
-
   constructor(
-    @InjectRepository(User) repository:Repository<User>
-  ){
-    this.filterEngine = new FilterEngine(repository)
+    private readonly repository:UserRepository
+  ){}
+
+  async create(createUserDto: CreateUserDto) {
+    const user = this.repository.create(createUserDto as any);
+    return await this.repository.save(user);
   }
 
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  async findAll(dto:FilterDto) {
+    return await this.repository.filterAll(dto);
+  }
+  
+  async findOneBy<T extends keyof User>(key: T, value: User[T]) {
+    const user = await this.repository.findOneBy({
+      [key]: value
+    });
+    if (!user) {
+      throw new NotFoundException(`Usuário com ${key} ${value} não encontrado`);
+    }
+    return user
   }
 
-  async findAll(dto:FilterUser) {
-    console.log(dto);
-    console.log(Object.keys(dto))
-    return await this.filterEngine.filterAll(dto);
+  async update(id: number, updateUserDto: UpdateUserDto) {
+    const user = await this.findOneBy('id', id);
+    Object.assign(user, updateUserDto);
+    return await this.repository.save(user);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
-  }
-
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: number) {
+    const user = await this.findOneBy('id',id);
+    return await this.repository.softRemove(user);
   }
 }

@@ -1,21 +1,22 @@
 import { BeforeInsert, Column, Entity } from "typeorm";
 import * as bcrypt from 'bcrypt'
-import { BaseEntity } from "../../shared/base-entity";
+import { AggregateRoot } from "../../shared/aggregate-root";
+
 
 @Entity({name:'users'})
-export class User extends BaseEntity{
+export class User extends AggregateRoot{
 
     @Column()
-    username: string
+    username!: string
 
     @Column()
-    password: string;
+    password!: string;
 
     @Column()
-    email: string
+    email!: string
 
     @Column()
-    enabled: boolean
+    enabled!: boolean
 
     @BeforeInsert()
     async hash_password(){

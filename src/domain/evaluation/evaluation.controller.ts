@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { EvaluationService } from './evaluation.service';
 import { CreateEvaluationDto } from './dto/create-evaluation.dto';
 import { UpdateEvaluationDto } from './dto/update-evaluation.dto';
+import { FilterDto } from '../shared/filter/filter-dto';
 
 @Controller('evaluation')
 export class EvaluationController {
@@ -13,13 +14,13 @@ export class EvaluationController {
   }
 
   @Get()
-  findAll() {
-    return this.evaluationService.findAll();
+  findAll(@Query() dto: FilterDto) {
+    return this.evaluationService.findAll(dto);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.evaluationService.findOne(+id);
+    return this.evaluationService.findOneBy('id', +id);
   }
 
   @Patch(':id')

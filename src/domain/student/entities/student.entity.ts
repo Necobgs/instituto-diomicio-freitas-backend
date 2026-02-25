@@ -1,22 +1,29 @@
-import { Column, Entity } from "typeorm";
-import { BaseEntity } from "../../shared/base-entity";
+import { Column, Entity, ManyToOne, OneToMany } from "typeorm";
+import { AggregateRoot } from "../../shared/aggregate-root";
+import { Enterprise } from "../../enterprise/entities/enterprise.entity";
+import { Monitoring } from "../../monitoring/entities/monitoring.entity";
 
 @Entity({name:'students'})
-export class Student extends BaseEntity{
+export class Student extends AggregateRoot{
 
     @Column()
-    name: string;
+    name!: string;
 
     @Column()
-    phone: string;
+    phone!: string;
 
     @Column({type:'date'})
-    date_birthday: Date;
+    date_birthday!: Date;
 
     @Column({length:15})
-    cpf: string;
+    cpf!: string;
 
     @Column()
-    enabled: boolean
+    enabled!: boolean
 
+    @ManyToOne(() => Enterprise, enterprise => enterprise.students)
+    enterprise?: Enterprise;
+
+    @OneToMany(() => Monitoring, monitoring => monitoring.student)
+    monitorings?: Monitoring[];
 }

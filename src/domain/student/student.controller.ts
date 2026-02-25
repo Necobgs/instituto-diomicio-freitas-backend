@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { StudentService } from './student.service';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
+import { FilterDto } from '../shared/filter/filter-dto';
 
 @Controller('student')
 export class StudentController {
@@ -13,13 +14,13 @@ export class StudentController {
   }
 
   @Get()
-  findAll() {
-    return this.studentService.findAll();
+  findAll(@Query() dto: FilterDto) {
+    return this.studentService.findAll(dto);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.studentService.findOne(+id);
+    return this.studentService.findOneBy('id', +id);
   }
 
   @Patch(':id')
