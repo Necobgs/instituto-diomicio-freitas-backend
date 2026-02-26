@@ -26,6 +26,15 @@ export class EvaluationFieldTypeService {
     return item;
   }
 
+  async existsBy<T extends keyof EvaluationFieldType>(key: T, value: EvaluationFieldType[T],withDeleted:boolean=true) {
+    return await this.repository.exists({
+      where:{ 
+        [key]: value
+      },
+      withDeleted
+    });
+  }
+
   async update(id: number, updateEvaluationFieldTypeDto: UpdateEvaluationFieldTypeDto) {
     const et = await this.findOneBy('id', id);
     Object.assign(et, updateEvaluationFieldTypeDto);

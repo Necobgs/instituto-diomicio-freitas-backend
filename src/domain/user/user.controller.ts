@@ -5,9 +5,11 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { FilterDto } from '../shared/filter/filter-dto';
 import { Public } from '../shared/public.decorator';
+import { RecoverPasswordDto } from './dto/recover-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @ApiTags('user')
-// @ApiBearerAuth('access-token')
+@ApiBearerAuth('access-token')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -41,5 +43,19 @@ export class UserController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.userService.remove(+id);
+  }
+
+  @ApiOperation({ summary: 'Request password recovery by email' })
+  @Public()
+  @Post('password/recover')
+  requestPasswordRecovery(@Body() dto: RecoverPasswordDto) {
+    return this.userService.requestPasswordRecovery(dto);
+  }
+
+  @ApiOperation({ summary: 'Reset password using recovery token' })
+  @Public()
+  @Post('password/reset')
+  resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.userService.resetPassword(dto);
   }
 }

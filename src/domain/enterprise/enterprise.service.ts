@@ -26,6 +26,15 @@ export class EnterpriseService {
     return item;
   }
 
+  async existsBy<T extends keyof Enterprise>(key: T, value: Enterprise[T],withDeleted:boolean=true) {
+    return await this.repository.exists({
+      where:{ 
+        [key]: value
+      },
+      withDeleted
+    });
+  }
+
   async update(id: number, updateEnterpriseDto: UpdateEnterpriseDto) {
     const ent = await this.findOneBy('id', id);
     Object.assign(ent, updateEnterpriseDto);

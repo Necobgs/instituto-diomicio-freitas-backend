@@ -12,6 +12,10 @@ import { EvaluationFieldTypeModule } from './domain/evaluation_field_type/evalua
 import { EvaluationQuestionModule } from './domain/evaluation_question/evaluation_question.module';
 import { EvaluationFieldModule } from './domain/evaluation_field/evaluation_field.module';
 import { AuthModule } from './domain/auth/auth.module';
+import { EmailModule } from './integrations/email/email.module';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -32,6 +36,32 @@ import { AuthModule } from './domain/auth/auth.module';
         entities:['dist/**/*.entity.js']
       })
     }),
+    MailerModule.forRootAsync({
+      imports:[ConfigModule],
+      inject:[ConfigService],
+      useFactory: (configService:ConfigService) => ({
+        transport: {
+          host: 'smtp.gmail.com',
+          port: 587,
+          secure: false,
+          auth: {
+            user: configService.get('EMAIL_USER'),
+            pass: configService.get('EMAIL_PASSWORD'),
+          },
+        },
+        defaults: {
+          from: configService.get('EMAIL_USER'),
+        },
+        template: {
+          dir: join(__dirname, '..', 'templates'),
+          adapter: new HandlebarsAdapter(),
+          options: {
+            strict: true,
+          },
+        },
+      })
+    }),
+    EmailModule,
     UserModule,
     EnterpriseModule,
     StudentModule,

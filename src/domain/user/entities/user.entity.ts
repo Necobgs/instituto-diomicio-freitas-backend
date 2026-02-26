@@ -15,6 +15,12 @@ export class User extends AggregateRoot{
     @Column()
     email!: string
 
+    @Column({ name: 'reset_password_token', nullable: true })
+    resetPasswordToken?: string | null;
+
+    @Column({ name: 'reset_password_expires', type: 'timestamptz', nullable: true })
+    resetPasswordExpires?: Date | null;
+
     @BeforeInsert()
     async hash_password(){
         this.password = await bcrypt.hash(this.password,10)

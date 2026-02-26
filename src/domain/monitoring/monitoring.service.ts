@@ -26,6 +26,15 @@ export class MonitoringService {
     return item;
   }
 
+  async existsBy<T extends keyof Monitoring>(key: T, value: Monitoring[T],withDeleted:boolean=true) {
+    return await this.repository.exists({
+      where:{
+        [key]: value
+      },
+      withDeleted
+    });
+  }
+
   async update(id: number, updateMonitoringDto: UpdateMonitoringDto) {
     const m = await this.findOneBy('id', id);
     Object.assign(m, updateMonitoringDto);

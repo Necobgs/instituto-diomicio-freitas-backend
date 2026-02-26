@@ -28,6 +28,15 @@ export class EvaluationService {
     return item;
   }
 
+  async existsBy<T extends keyof Evaluation>(key: T, value: Evaluation[T],withDeleted:boolean=true) {
+    return await this.repository.exists({
+      where:{ 
+        [key]: value
+      },
+      withDeleted
+    });
+  }
+
   async update(id: number, updateEvaluationDto: UpdateEvaluationDto) {
     const ev = await this.findOneBy('id', id);
     Object.assign(ev, updateEvaluationDto);
