@@ -11,6 +11,7 @@ import { EvaluationModule } from './domain/evaluation/evaluation.module';
 import { EvaluationFieldTypeModule } from './domain/evaluation_field_type/evaluation_field_type.module';
 import { EvaluationQuestionModule } from './domain/evaluation_question/evaluation_question.module';
 import { EvaluationFieldModule } from './domain/evaluation_field/evaluation_field.module';
+import { AuthModule } from './domain/auth/auth.module';
 
 @Module({
   imports: [
@@ -38,7 +39,8 @@ import { EvaluationFieldModule } from './domain/evaluation_field/evaluation_fiel
     EvaluationModule,
     EvaluationFieldTypeModule,
     EvaluationQuestionModule,
-    EvaluationFieldModule
+    EvaluationFieldModule,
+    AuthModule
   ],
   controllers: [AppController],
   providers: [AppService],

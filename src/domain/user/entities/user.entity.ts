@@ -15,9 +15,6 @@ export class User extends AggregateRoot{
     @Column()
     email!: string
 
-    @Column()
-    enabled!: boolean
-
     @BeforeInsert()
     async hash_password(){
         this.password = await bcrypt.hash(this.password,10)

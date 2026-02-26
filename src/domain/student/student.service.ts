@@ -1,19 +1,31 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import { FilterDto } from '../shared/filter/filter-dto';
 import { StudentRepository } from './student.repository';
 import { Student } from './entities/student.entity';
+import { EnterpriseService } from '../enterprise/enterprise.service';
 
 @Injectable()
 export class StudentService {
   constructor(
     private readonly repository: StudentRepository,
+    private readonly enterpriseService: EnterpriseService
   ) {}
 
-  async create(createStudentDto: CreateStudentDto) {
-    const s = this.repository.create(createStudentDto as any);
-    return await this.repository.save(s);
+  async create(dto: CreateStudentDto) {
+    const student = this.repository.create(dto);
+    const exists = await this.existsBy('cpf',dto.cpf)
+
+    if(exists){
+      throw new BadRequestException('Estudante com o cpf já existe');
+    }
+
+    if(dto.enterpriseId){
+      student.enterprise = await this.enterpriseService.findOneBy('id',dto.enterpriseId)
+    }
+
+    return await this.repository.save(student);
   }
 
   async findAll(dto: FilterDto) {
@@ -26,6 +38,15 @@ export class StudentService {
       throw new NotFoundException(`Aluno com ${key} ${value} não encontrado`);
     }
     return student;
+  }
+
+  async existsBy<T extends keyof Student>(key: T, value: Student[T],withDeleted:boolean=true) {
+    return await this.repository.exists({
+      where:{ 
+        [key]: value
+      },
+      withDeleted
+    });
   }
 
   async update(id: number, updateStudentDto: UpdateStudentDto) {

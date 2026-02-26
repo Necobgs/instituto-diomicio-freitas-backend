@@ -15,11 +15,8 @@ export class Student extends AggregateRoot{
     @Column({type:'date'})
     date_birthday!: Date;
 
-    @Column({length:15})
+    @Column({length:15, unique:true})
     cpf!: string;
-
-    @Column()
-    enabled!: boolean
 
     @ManyToOne(() => Enterprise, enterprise => enterprise.students)
     enterprise?: Enterprise;

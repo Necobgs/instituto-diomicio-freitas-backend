@@ -25,6 +25,11 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
+## API Documentation
+
+This project uses Swagger for API documentation. Once the application is running, open your browser and go to `http://localhost:3000/api` (or replace the port if configured via `PORT` environment variable) to view the interactive docs. JWT Bearer authorization is supported; click the "Authorize" button and paste a token obtained from the `/auth/login` endpoint.
+
+
 ## Project setup
 
 ```bash
