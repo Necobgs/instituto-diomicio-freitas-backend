@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Recuperação de Senha</title>
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f7f7f7;
+      padding: 40px;
+      color: #222;
+    }
+    .container {
+      background: #fff;
+      padding: 32px;
+      max-width: 480px;
+      margin: auto;
+      border-radius: 8px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.09);
+    }
+    .title {
+      font-size: 24px;
+      margin-bottom: 18px;
+      color: #005BAA;
+    }
+    .content {
+      font-size: 16px;
+      margin-bottom: 26px;
+    }
+    .btn {
+      display: inline-block;
+      background: #005BAA;
+      color: #fff;
+      padding: 12px 28px;
+      text-decoration: none;
+      border-radius: 4px;
+      font-weight: bold;
+      margin-top: 8px;
+    }
+    .footer {
+      margin-top: 40px;
+      font-size: 12px;
+      color: #888;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="title">Recuperação de Senha</div>
+    <div class="content">
+      Olá<br><br>
+      Recebemos uma solicitação para redefinir a sua senha.<br>
+      Para continuar, clique no botão abaixo:
+    </div>
+    <a href="{{data}}" class="btn">Redefinir Senha</a>
+    <div class="content" style="font-size:14px; margin-top: 24px;">
+      Se você não solicitou a redefinição de senha, ignore este e-mail. Nenhuma alteração será feita em sua conta.
+    </div>
+    <div class="footer">
+      &copy; {{year}} Instituto Diomício Freitas. Todos os direitos reservados.
+    </div>
+  </div>
+</body>
+</html>

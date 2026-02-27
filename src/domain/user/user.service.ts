@@ -55,9 +55,11 @@ export class UserService {
     });
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
-    const user = await this.findOneBy('id', id);
-    Object.assign(user, updateUserDto);
+  async update(id: number, dto: UpdateUserDto) {
+    const user = await this.repository.preload({id,...dto})
+    if(!user){
+      throw new BadRequestException('Usuário não encontrado para ser atualizado')
+    }
     return await this.repository.save(user);
   }
 
