@@ -10,6 +10,8 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { randomBytes } from 'crypto';
+import { EmailService } from '../../integrations/email/email.service';
+import { encryptPassword } from '../../utils/encrypt-password';
 
 @Injectable()
 export class UserService {
@@ -17,6 +19,7 @@ export class UserService {
   constructor(
     private readonly repository:UserRepository,
     private readonly configService: ConfigService,
+    private readonly emailService: EmailService,
   ){}
 
   async create(createUserDto: CreateUserDto) {
@@ -83,11 +86,13 @@ export class UserService {
     const baseUrl = this.configService.get<string>('PASSWORD_RESET_URL');
     const resetUrl = baseUrl ? `${baseUrl}?token=${token}` : token;
 
-    // In a real application you would send the resetUrl to the user email here.
+    await this.emailService.sendEmail(user.email, 'Recuperação de Senha', 'password-recovery',{
+      data:resetUrl,
+      year:new Date().getFullYear(),
+    });
 
     return {
-      message: 'Se o email existir, um link de recuperação foi enviado.',
-      resetUrl,
+      message: 'Se o email existir, um link de recuperação foi enviado.'
     };
   }
 
@@ -104,7 +109,7 @@ export class UserService {
       throw new BadRequestException('Token de recuperação inválido ou expirado');
     }
 
-    user.password = await bcrypt.hash(dto.newPassword, 10);
+    user.password = await encryptPassword(dto.newPassword)
     user.resetPasswordToken = null;
     user.resetPasswordExpires = null;
 

@@ -53,7 +53,7 @@ import { join } from 'path';
           from: configService.get('EMAIL_USER'),
         },
         template: {
-          dir: join(__dirname, '..', 'templates'),
+          dir: join(__dirname, 'templates'),
           adapter: new HandlebarsAdapter(),
           options: {
             strict: true,

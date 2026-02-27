@@ -8,14 +8,15 @@ export class EmailService {
         private readonly mailerService: MailerService,
     ) {}
 
-    async sendEmail(to: string, subject: string, text: string, template: string) {
+    async sendEmail(to: string, subject: string, template: string, params:object) {
         return await this.mailerService.sendMail({
             to,
             subject,
             template,
             context: {
-                data: text,
+                ...params
             },
+            
         });
     }
 }
