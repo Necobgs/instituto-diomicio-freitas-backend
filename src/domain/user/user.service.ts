@@ -7,9 +7,7 @@ import { User } from './entities/user.entity';
 import { DEFAULT_PASSWORD } from '../../consts/default-password';
 import { RecoverPasswordDto } from './dto/recover-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
-import { randomBytes } from 'crypto';
 import { EmailService } from '../../integrations/email/email.service';
 import { encryptPassword } from '../../utils/encrypt-password';
 
