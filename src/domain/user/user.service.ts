@@ -22,13 +22,14 @@ export class UserService {
     private readonly emailService: EmailService,
   ){}
 
-  async create(createUserDto: CreateUserDto) {
-    const exists = await this.existsBy('email',createUserDto.email)
+  async create(dto: CreateUserDto) {
+    const exists = await this.existsBy('username',dto.username)
     if(exists){
       throw new BadRequestException('Usuário com o email já existe');
     }
-    const user = this.repository.create(createUserDto);
-    user.password = DEFAULT_PASSWORD
+    const user = this.repository.create(dto);
+    user.password = DEFAULT_PASSWORD;
+    user.mustChangePassword = true;
     return await this.repository.save(user);
   }
 
@@ -68,52 +69,11 @@ export class UserService {
     return await this.repository.softRemove(user);
   }
 
-  async requestPasswordRecovery(dto: RecoverPasswordDto) {
-    const user = await this.repository.findOne({
-      where: { email: dto.email },
-    });
-
-    if (!user) {
-      return {
-        message: 'Se o email existir, um link de recuperação foi enviado.',
-      };
-    }
-
-    const token = randomBytes(32).toString('hex');
-    user.resetPasswordToken = token;
-    user.resetPasswordExpires = new Date(Date.now() + 60 * 60 * 1000);
-
-    await this.repository.save(user);
-
-    const baseUrl = this.configService.get<string>('PASSWORD_RESET_URL');
-    const resetUrl = baseUrl ? `${baseUrl}?token=${token}` : token;
-
-    await this.emailService.sendEmail(user.email, 'Recuperação de Senha', 'password-recovery',{
-      data:resetUrl,
-      year:new Date().getFullYear(),
-    });
-
-    return {
-      message: 'Se o email existir, um link de recuperação foi enviado.'
-    };
-  }
-
-  async resetPassword(dto: ResetPasswordDto) {
-    const user = await this.repository.findOne({
-      where: { resetPasswordToken: dto.token },
-    });
-
-    if (
-      !user ||
-      !user.resetPasswordExpires ||
-      user.resetPasswordExpires < new Date()
-    ) {
-      throw new BadRequestException('Token de recuperação inválido ou expirado');
-    }
+  async resetPassword(userId:number ,dto: ResetPasswordDto) {
+    const user = await this.findOneBy('id',userId);
 
     user.password = await encryptPassword(dto.newPassword)
-    user.resetPasswordToken = null;
-    user.resetPasswordExpires = null;
+    user.mustChangePassword = false
 
     await this.repository.save(user);
 

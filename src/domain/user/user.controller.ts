@@ -1,11 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Request } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { FilterDto } from '../shared/filter/filter-dto';
 import { Public } from '../shared/public.decorator';
-import { RecoverPasswordDto } from './dto/recover-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @ApiTags('user')
@@ -45,17 +44,10 @@ export class UserController {
     return this.userService.remove(+id);
   }
 
-  @ApiOperation({ summary: 'Request password recovery by email' })
-  @Public()
-  @Post('password/recover')
-  requestPasswordRecovery(@Body() dto: RecoverPasswordDto) {
-    return this.userService.requestPasswordRecovery(dto);
-  }
-
-  @ApiOperation({ summary: 'Reset password using recovery token' })
-  @Public()
-  @Post('password/reset')
-  resetPassword(@Body() dto: ResetPasswordDto) {
-    return this.userService.resetPassword(dto);
+  @ApiOperation({ summary: 'Change password at first login' })
+  @Post('password-change')
+  resetPassword(@Body() dto: ResetPasswordDto,@Request() req) {
+    console.log(req.user)
+    return this.userService.resetPassword(req.user.id,dto);
   }
 }

@@ -13,14 +13,8 @@ export class User extends AggregateRoot{
     @Column()
     password!: string;
 
-    @Column()
-    email!: string
-
-    @Column({ name: 'reset_password_token', nullable: true, type:'varchar' })
-    resetPasswordToken?: string | null;
-
-    @Column({ name: 'reset_password_expires', type: 'timestamp', nullable: true })
-    resetPasswordExpires?: Date | null;
+    @Column({default:true})
+    mustChangePassword!: boolean;
 
     @BeforeInsert()
     async hash_password(){

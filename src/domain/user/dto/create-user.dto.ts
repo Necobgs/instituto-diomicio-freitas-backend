@@ -12,7 +12,4 @@ export class CreateUserDto {
 	@MinLength(6)
 	password!: string;
 
-	@ApiProperty({ example: 'user@example.com' })
-	@IsEmail()
-	email!: string;
 }
