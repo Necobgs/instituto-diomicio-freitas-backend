@@ -23,9 +23,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
     const request = context.switchToHttp().getRequest();
     const user = request.user;
-    console.log(user)
-    
-    const isChangePasswordRoute = request.url.includes('password-change');
+
+    const isChangePasswordRoute = request.url.includes('password-change') || request.url.includes('auth/login');
 
     // Lógica de bloqueio: se deve mudar a senha e NÃO está na rota de mudança
     if (user?.mustChangePassword && !isChangePasswordRoute) {

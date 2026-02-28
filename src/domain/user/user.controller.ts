@@ -11,7 +11,7 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 @ApiBearerAuth('access-token')
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) { }
 
   @ApiOperation({ summary: 'Create a new user' })
   @Public()
@@ -22,14 +22,14 @@ export class UserController {
 
   @ApiOperation({ summary: 'Retrieve all users' })
   @Get()
-  findAll(@Query() dto:FilterDto) {
+  findAll(@Query() dto: FilterDto) {
     return this.userService.findAll(dto);
   }
 
   @ApiOperation({ summary: 'Retrieve a single user by ID' })
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.userService.findOneBy('id',+id);
+    return this.userService.findOneBy('id', +id);
   }
 
   @ApiOperation({ summary: 'Update an existing user by ID' })
@@ -46,8 +46,13 @@ export class UserController {
 
   @ApiOperation({ summary: 'Change password at first login' })
   @Post('password-change')
-  resetPassword(@Body() dto: ResetPasswordDto,@Request() req) {
-    console.log(req.user)
-    return this.userService.resetPassword(req.user.id,dto);
+  resetPassword(@Body() dto: ResetPasswordDto, @Request() req) {
+    return this.userService.resetPassword(req.user.id, dto);
+  }
+
+  @ApiOperation({ summary: 'Reset user password to default and require change on next login' })
+  @Post(':id/reset-to-default-password')
+  resetToDefaultPassword(@Param('id') id: string) {
+    return this.userService.resetToDefaultPassword(+id);
   }
 }

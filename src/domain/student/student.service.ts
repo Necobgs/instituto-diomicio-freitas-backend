@@ -11,18 +11,18 @@ export class StudentService {
   constructor(
     private readonly repository: StudentRepository,
     private readonly enterpriseService: EnterpriseService
-  ) {}
+  ) { }
 
   async create(dto: CreateStudentDto) {
     const student = this.repository.create(dto);
-    const exists = await this.existsBy('cpf',dto.cpf)
+    const exists = await this.existsBy('cpf', dto.cpf)
 
-    if(exists){
+    if (exists) {
       throw new BadRequestException('Estudante com o cpf já existe');
     }
 
-    if(dto.enterpriseId){
-      student.enterprise = await this.enterpriseService.findOneBy('id',dto.enterpriseId)
+    if (dto.enterpriseId) {
+      student.enterprise = await this.enterpriseService.findOneBy('id', dto.enterpriseId)
     }
 
     return await this.repository.save(student);
@@ -40,20 +40,29 @@ export class StudentService {
     return student;
   }
 
-  async existsBy<T extends keyof Student>(key: T, value: Student[T],withDeleted:boolean=true) {
+  async existsBy<T extends keyof Student>(key: T, value: Student[T], withDeleted: boolean = true) {
     return await this.repository.exists({
-      where:{ 
+      where: {
         [key]: value
       },
       withDeleted
     });
   }
 
-  async update(id: number, updateStudentDto: UpdateStudentDto) {
-    const s = await this.findOneBy('id', id);
-    Object.assign(s, updateStudentDto);
-    return await this.repository.save(s);
+  async update(id: number, dto: UpdateStudentDto) {
+    const student = await this.repository.preload({ id, ...dto })
+
+    if (!student) {
+      throw new NotFoundException(`Aluno com id ${id} não encontrado`);
+    }
+
+    if (dto.enterpriseId) {
+      student.enterprise = await this.enterpriseService.findOneBy('id', dto.enterpriseId)
+    }
+
+    return await this.repository.save(student);
   }
+
   async remove(id: number) {
     const student = await this.findOneBy('id', id);
     return await this.repository.softRemove(student);
