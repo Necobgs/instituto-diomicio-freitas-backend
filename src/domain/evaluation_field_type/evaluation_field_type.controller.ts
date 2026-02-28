@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { EvaluationFieldTypeService } from './evaluation_field_type.service';
 import { CreateEvaluationFieldTypeDto } from './dto/create-evaluation_field_type.dto';
 import { UpdateEvaluationFieldTypeDto } from './dto/update-evaluation_field_type.dto';
@@ -9,7 +9,7 @@ import { FilterDto } from '../shared/filter/filter-dto';
 @ApiBearerAuth('access-token')
 @Controller('evaluation-field-type')
 export class EvaluationFieldTypeController {
-  constructor(private readonly evaluationFieldTypeService: EvaluationFieldTypeService) {}
+  constructor(private readonly evaluationFieldTypeService: EvaluationFieldTypeService) { }
 
   @ApiOperation({ summary: 'Create a new evaluation field type' })
   @Post()
@@ -19,6 +19,7 @@ export class EvaluationFieldTypeController {
 
   @ApiOperation({ summary: 'List all evaluation field types' })
   @Get()
+  @ApiQuery({ type: FilterDto })
   findAll(@Query() dto: FilterDto) {
     return this.evaluationFieldTypeService.findAll(dto);
   }

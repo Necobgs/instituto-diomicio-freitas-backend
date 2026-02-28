@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { StudentService } from './student.service';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
@@ -9,7 +9,7 @@ import { FilterDto } from '../shared/filter/filter-dto';
 @ApiBearerAuth('access-token')
 @Controller('student')
 export class StudentController {
-  constructor(private readonly studentService: StudentService) {}
+  constructor(private readonly studentService: StudentService) { }
 
   @ApiOperation({ summary: 'Create a new student' })
   @Post()
@@ -19,6 +19,7 @@ export class StudentController {
 
   @ApiOperation({ summary: 'List all students' })
   @Get()
+  @ApiQuery({ type: FilterDto })
   findAll(@Query() dto: FilterDto) {
     return this.studentService.findAll(dto);
   }

@@ -28,6 +28,21 @@ export class UserService {
     const user = this.repository.create(dto);
     user.password = DEFAULT_PASSWORD;
     user.mustChangePassword = true;
+
+    if (dto.email) {
+      const exists = await this.existsBy('email', dto.email)
+      if (exists) {
+        throw new BadRequestException('Usuário com o email já existe');
+      }
+    }
+
+    if (dto.cpf) {
+      const exists = await this.existsBy('cpf', dto.cpf)
+      if (exists) {
+        throw new BadRequestException('Usuário com o cpf já existe');
+      }
+    }
+
     const { password, ...result } = await this.repository.save(user);
     return result;
   }
@@ -68,6 +83,19 @@ export class UserService {
     const user = await this.repository.preload({ id, ...dto })
     if (!user) {
       throw new BadRequestException('Usuário não encontrado para ser atualizado')
+    }
+    if (dto.email) {
+      const exists = await this.existsBy('email', dto.email)
+      if (exists) {
+        throw new BadRequestException('Usuário com o email já existe');
+      }
+    }
+
+    if (dto.cpf) {
+      const exists = await this.existsBy('cpf', dto.cpf)
+      if (exists) {
+        throw new BadRequestException('Usuário com o cpf já existe');
+      }
     }
     return await this.repository.save(user);
   }

@@ -4,8 +4,8 @@ import { AggregateRoot } from "../../shared/aggregate-root";
 import { encryptPassword } from "../../../utils/encrypt-password";
 
 
-@Entity({name:'users'})
-export class User extends AggregateRoot{
+@Entity({ name: 'users' })
+export class User extends AggregateRoot {
 
     @Column()
     username!: string
@@ -13,11 +13,17 @@ export class User extends AggregateRoot{
     @Column()
     password!: string;
 
-    @Column({default:true})
+    @Column({ default: true })
     mustChangePassword!: boolean;
 
+    @Column()
+    email!: string;
+
+    @Column()
+    cpf!: string;
+
     @BeforeInsert()
-    async hash_password(){
+    async hash_password() {
         this.password = await encryptPassword(this.password)
     }
 
