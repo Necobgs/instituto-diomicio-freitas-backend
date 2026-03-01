@@ -46,6 +46,14 @@ export class EnterpriseService {
     if (!enterprise) {
       throw new NotFoundException(`Empresa com id ${id} não encontrada`);
     }
+
+    if (dto.cnpj) {
+      const exists = await this.existsBy('cnpj', dto.cnpj)
+      if (exists) {
+        throw new BadRequestException('Empresa com o cnpj já existe');
+      }
+    }
+
     return await this.repository.save(enterprise);
   }
 

@@ -4,7 +4,7 @@ import { EvaluationQuestion } from "../../evaluation_question/entities/evaluatio
 import { Monitoring } from "../../monitoring/entities/monitoring.entity";
 
 
-@Entity({name:'evaluations'})
+@Entity({ name: 'evaluations' })
 export class Evaluation extends AggregateRoot {
 
     @Column()
