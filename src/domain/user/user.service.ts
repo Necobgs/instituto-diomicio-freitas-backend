@@ -5,11 +5,11 @@ import { UserRepository } from './user.repository';
 import { FilterDto } from '../shared/filter/filter-dto';
 import { User } from './entities/user.entity';
 import { DEFAULT_PASSWORD } from '../../consts/default-password';
-import { RecoverPasswordDto } from './dto/recover-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ConfigService } from '@nestjs/config';
 import { EmailService } from '../../integrations/email/email.service';
 import { encryptPassword } from '../../utils/encrypt-password';
+import { AuthorizationDecoratorArgs } from '../shared/authorization/authorization.decorator';
 
 @Injectable()
 export class UserService {
@@ -78,5 +78,41 @@ export class UserService {
     return {
       message: 'Senha alterada com sucesso',
     };
+  }
+
+  async hasPermissions(userId: number, permissions: AuthorizationDecoratorArgs[]) {
+    if (permissions.length === 0) {
+      return true;
+    }
+
+    const qb = this.repository
+      .createQueryBuilder('user')
+      .where('user.id = :userId', { userId })
+      .andWhere('user.deleted_at IS NULL')
+      .select('1');
+
+    permissions.forEach((perm, index) => {
+      qb.andWhere(
+        `
+        EXISTS (
+          SELECT 1
+          FROM users_permissions up
+          INNER JOIN permissions p ON p.id = up.permission_id
+          WHERE up.user_id = "user"."id"
+            AND p.resource = :resource_${index}
+            AND p.action IN (:...actions_${index})
+            AND p.deleted_at IS NULL
+          GROUP BY p.resource
+          HAVING COUNT(DISTINCT p.action) = :actionsCount_${index}
+        )
+        `,
+        {
+          [`resource_${index}`]: perm.resource,
+          [`actions_${index}`]: perm.actions,
+          [`actionsCount_${index}`]: perm.actions.length,
+        },
+      );
+    });
+    return qb.getExists();
   }
 }

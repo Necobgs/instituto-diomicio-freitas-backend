@@ -12,6 +12,7 @@ import { EvaluationFieldTypeModule } from './domain/evaluation_field_type/evalua
 import { EvaluationQuestionModule } from './domain/evaluation_question/evaluation_question.module';
 import { EvaluationFieldModule } from './domain/evaluation_field/evaluation_field.module';
 import { AuthModule } from './domain/auth/auth.module';
+import { NotificationModule } from './domain/notification/notification.module';
 import { EmailModule } from './integrations/email/email.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
@@ -70,7 +71,8 @@ import { join } from 'path';
     EvaluationFieldTypeModule,
     EvaluationQuestionModule,
     EvaluationFieldModule,
-    AuthModule
+    AuthModule,
+    NotificationModule
   ],
   controllers: [AppController],
   providers: [AppService],
