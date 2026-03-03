@@ -1,15 +1,23 @@
-import { IsString, IsEmail, MinLength } from 'class-validator';
+import { IsEmail, IsString, Length, MinLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 
 export class CreateUserDto {
+
 	@ApiProperty({ example: 'john_doe' })
 	@IsString()
 	@MinLength(3)
+	@Transform(({ value }) => value.toUpperCase())
 	username!: string;
 
-	@ApiProperty({ example: 'P@ssword123' })
+	@ApiProperty({ example: 'john_doe_email@email.com' })
 	@IsString()
-	@MinLength(6)
-	password!: string;
+	@IsEmail()
+	email!: string;
+
+	@ApiProperty({ example: '12345678901' })
+	@IsString()
+	@Length(11, 15)
+	cpf!: string;
 
 }

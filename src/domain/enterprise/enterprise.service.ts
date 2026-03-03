@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateEnterpriseDto } from './dto/create-enterprise.dto';
 import { UpdateEnterpriseDto } from './dto/update-enterprise.dto';
 import { FilterDto } from '../shared/filter/filter-dto';
@@ -9,11 +9,17 @@ import { Enterprise } from './entities/enterprise.entity';
 export class EnterpriseService {
   constructor(
     private readonly repository: EnterpriseRepository,
-  ) {}
+  ) { }
 
-  async create(createEnterpriseDto: CreateEnterpriseDto) {
-    const ent = this.repository.create(createEnterpriseDto as any);
-    return await this.repository.save(ent);
+  async create(dto: CreateEnterpriseDto) {
+    const enterprise = this.repository.create(dto);
+
+    const exists = await this.existsBy('cnpj', dto.cnpj)
+    if (exists) {
+      throw new BadRequestException('Empresa com o cnpj já existe');
+    }
+
+    return await this.repository.save(enterprise);
   }
 
   async findAll(dto: FilterDto) {
@@ -26,19 +32,29 @@ export class EnterpriseService {
     return item;
   }
 
-  async existsBy<T extends keyof Enterprise>(key: T, value: Enterprise[T],withDeleted:boolean=true) {
+  async existsBy<T extends keyof Enterprise>(key: T, value: Enterprise[T], withDeleted: boolean = true) {
     return await this.repository.exists({
-      where:{ 
+      where: {
         [key]: value
       },
       withDeleted
     });
   }
 
-  async update(id: number, updateEnterpriseDto: UpdateEnterpriseDto) {
-    const ent = await this.findOneBy('id', id);
-    Object.assign(ent, updateEnterpriseDto);
-    return await this.repository.save(ent);
+  async update(id: number, dto: UpdateEnterpriseDto) {
+    const enterprise = await this.repository.preload({ id, ...dto });
+    if (!enterprise) {
+      throw new NotFoundException(`Empresa com id ${id} não encontrada`);
+    }
+
+    if (dto.cnpj) {
+      const exists = await this.existsBy('cnpj', dto.cnpj)
+      if (exists) {
+        throw new BadRequestException('Empresa com o cnpj já existe');
+      }
+    }
+
+    return await this.repository.save(enterprise);
   }
 
   async remove(id: number) {

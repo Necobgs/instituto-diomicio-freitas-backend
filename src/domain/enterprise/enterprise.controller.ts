@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { EnterpriseService } from './enterprise.service';
 import { CreateEnterpriseDto } from './dto/create-enterprise.dto';
 import { UpdateEnterpriseDto } from './dto/update-enterprise.dto';
@@ -9,7 +9,7 @@ import { FilterDto } from '../shared/filter/filter-dto';
 @ApiBearerAuth('access-token')
 @Controller('enterprise')
 export class EnterpriseController {
-  constructor(private readonly enterpriseService: EnterpriseService) {}
+  constructor(private readonly enterpriseService: EnterpriseService) { }
 
   @ApiOperation({ summary: 'Create a new enterprise' })
   @Post()
@@ -19,6 +19,7 @@ export class EnterpriseController {
 
   @ApiOperation({ summary: 'List all enterprises' })
   @Get()
+  @ApiQuery({ type: FilterDto })
   findAll(@Query() dto: FilterDto) {
     return this.enterpriseService.findAll(dto);
   }

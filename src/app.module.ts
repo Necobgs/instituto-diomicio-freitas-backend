@@ -17,6 +17,8 @@ import { EmailModule } from './integrations/email/email.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { join } from 'path';
+import { PermissionModule } from './domain/permission/permission.module';
+import { RoleModule } from './domain/role/role.module';
 
 @Module({
   imports: [
@@ -72,7 +74,9 @@ import { join } from 'path';
     EvaluationQuestionModule,
     EvaluationFieldModule,
     AuthModule,
-    NotificationModule
+    NotificationModule,
+    PermissionModule,
+    RoleModule
   ],
   controllers: [AppController],
   providers: [AppService],

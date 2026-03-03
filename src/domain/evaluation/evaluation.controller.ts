@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { EvaluationService } from './evaluation.service';
 import { CreateEvaluationDto } from './dto/create-evaluation.dto';
 import { UpdateEvaluationDto } from './dto/update-evaluation.dto';
@@ -9,7 +9,7 @@ import { FilterDto } from '../shared/filter/filter-dto';
 @ApiBearerAuth('access-token')
 @Controller('evaluation')
 export class EvaluationController {
-  constructor(private readonly evaluationService: EvaluationService) {}
+  constructor(private readonly evaluationService: EvaluationService) { }
 
   @ApiOperation({ summary: 'Create a new evaluation' })
   @Post()
@@ -19,6 +19,7 @@ export class EvaluationController {
 
   @ApiOperation({ summary: 'List all evaluations' })
   @Get()
+  @ApiQuery({ type: FilterDto })
   findAll(@Query() dto: FilterDto) {
     return this.evaluationService.findAll(dto);
   }

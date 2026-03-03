@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { MonitoringService } from './monitoring.service';
 import { CreateMonitoringDto } from './dto/create-monitoring.dto';
 import { UpdateMonitoringDto } from './dto/update-monitoring.dto';
@@ -9,7 +9,7 @@ import { FilterDto } from '../shared/filter/filter-dto';
 @ApiBearerAuth('access-token')
 @Controller('monitoring')
 export class MonitoringController {
-  constructor(private readonly monitoringService: MonitoringService) {}
+  constructor(private readonly monitoringService: MonitoringService) { }
 
   @ApiOperation({ summary: 'Create a new monitoring record' })
   @Post()
@@ -19,6 +19,7 @@ export class MonitoringController {
 
   @ApiOperation({ summary: 'List all monitoring records' })
   @Get()
+  @ApiQuery({ type: FilterDto })
   findAll(@Query() dto: FilterDto) {
     return this.monitoringService.findAll(dto);
   }

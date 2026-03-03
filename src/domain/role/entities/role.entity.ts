@@ -1,8 +1,9 @@
 import { Permission } from "../../permission/entities/permission.entity";
-import { BaseEntity, Column, Entity, JoinTable, ManyToMany } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany } from "typeorm";
+import { AggregateRoot } from "../../shared/aggregate-root";
 
 @Entity({name:'roles'})
-export class Role extends BaseEntity{
+export class Role extends AggregateRoot{
 
     @Column({unique:true})
     name:string;
