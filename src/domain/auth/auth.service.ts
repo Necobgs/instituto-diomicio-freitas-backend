@@ -16,8 +16,8 @@ export class AuthService {
   async login(user: User) {
     const payload = {
       id: user.id,
-      username: user.username,
-      mustChangePassword: user.mustChangePassword
+      email: user.email,
+      mustChangePassword: user.mustChangePassword,
     };
     return {
       access_token: this.jwtService.sign(payload),
@@ -25,7 +25,7 @@ export class AuthService {
   }
   async validateUser(dto: SignInDto): Promise<User | null> {
 
-    const user = await this.userService.findFullUserBy('username', dto.username)
+    const user = await this.userService.findFullUserBy('email', dto.email)
     if (!user) throw new UnauthorizedException('Credenciais não encontradas')
     if (await bcrypt.compare(dto.password, user.password)) {
       return user;

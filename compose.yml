@@ -1,0 +1,34 @@
+services:
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: ${DATABASE_PG_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PG_PASSWORD}
+      POSTGRES_DB: ${DATABASE_PG_NAME}
+    ports:
+      - '${DATABASE_PG_PORT}:${DATABASE_PG_PORT}'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  api:
+    build: .
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: npm run start:dev
+    ports:
+      - '${APP_PORT}:${APP_PORT}'
+    environment:
+      DATABASE_PG_URL: postgresql://${DATABASE_PG_USER}:${DATABASE_PG_PASSWORD}@db:${DATABASE_PG_PORT}/${DATABASE_PG_NAME}
+      EMAIL_HOST: ${EMAIL_HOST}
+      EMAIL_PORT: ${EMAIL_PORT}
+      EMAIL_USER: ${EMAIL_USER}
+      EMAIL_PASSWORD: ${EMAIL_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      PASSWORD_RESET_URL: ${PASSWORD_RESET_URL}
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:

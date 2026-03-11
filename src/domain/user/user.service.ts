@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserRepository } from './user.repository';
@@ -11,6 +11,13 @@ import { EmailService } from '../../integrations/email/email.service';
 import { encryptPassword } from '../../utils/encrypt-password';
 import { AuthorizationDecoratorArgs } from '../shared/authorization/authorization.decorator';
 import { UserWithoutPassDto } from './dto/user-without-pass.dto';
+import { PasswordChangeRequestDto } from './dto/password-change-request.dto';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Role } from '../role/entities/role.entity';
+import { JwtService } from '@nestjs/jwt';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class UserService {
@@ -19,16 +26,14 @@ export class UserService {
     private readonly repository: UserRepository,
     private readonly configService: ConfigService,
     private readonly emailService: EmailService,
+    private readonly jwtService: JwtService,
+    @InjectRepository(Role) private readonly roleRepository: Repository<Role>,
+    private readonly eventEmitter: EventEmitter2,
   ) { }
 
   async create(dto: CreateUserDto) {
-    const exists = await this.existsBy('username', dto.username)
-    if (exists) {
-      throw new BadRequestException('Usuário com o email já existe');
-    }
     const user = this.repository.create(dto);
     user.password = DEFAULT_PASSWORD;
-    user.mustChangePassword = true;
 
     if (dto.email) {
       const exists = await this.existsBy('email', dto.email)
@@ -106,22 +111,55 @@ export class UserService {
     return await this.repository.softRemove(user);
   }
 
-  async resetPassword(userId: number, dto: ResetPasswordDto) {
+  async resetPassword(dto: ResetPasswordDto) {
     const user = await this.repository.preload({
-      id: userId,
+      tokenPasswordChange: dto.token,
       password: await encryptPassword(dto.newPassword),
-      mustChangePassword: false
+      mustChangePassword: false,
     });
 
-    if (!user) {
-      throw new NotFoundException(`Usuário com id ${userId} não encontrado`);
+    if (!user || (user.tokenPasswordChangeExpiresAt && user.tokenPasswordChangeExpiresAt < new Date())) {
+      throw new NotFoundException('Usuário não encontrado para alteração de senha');
     }
+
+    user.tokenPasswordChange = null;
+    user.tokenPasswordChangeExpiresAt = null;
 
     await this.repository.save(user);
 
     return {
       message: 'Senha alterada com sucesso',
     };
+  }
+
+  @OnEvent('password.change.request')
+  async sendPasswordChangeEmail(dto: PasswordChangeRequestDto) {
+
+    const user = await this.repository.preload({
+      email: dto.email,
+      tokenPasswordChange: randomUUID(),
+      tokenPasswordChangeExpiresAt: new Date(Date.now() + 60 * 60 * 1000),
+    });
+
+    console.log(user)
+
+    if (!user) {
+      return;
+    }
+
+    const resetToken = user.tokenPasswordChange;
+
+    const frontendUrl = this.configService.get('PASSWORD_RESET_URL');
+    const resetLink = `${frontendUrl}?token=${resetToken}`;
+
+    console.log(await this.repository.save(user));
+
+    await this.emailService.sendEmail(
+      user.email,
+      'Redefinição de Senha - Instituto Diomício Freitas',
+      'password-recovery',
+      { data: resetLink, year: new Date().getFullYear() },
+    );
   }
 
   async hasPermissions(userId: number, permissions: AuthorizationDecoratorArgs[]) {
@@ -164,7 +202,7 @@ export class UserService {
     const user = await this.repository.preload({
       id,
       password: await encryptPassword(DEFAULT_PASSWORD),
-      mustChangePassword: true
+      mustChangePassword: true,
     });
 
     if (!user) {
@@ -173,5 +211,15 @@ export class UserService {
 
     await this.repository.save(user);
     return { message: 'Senha resetada para a padrão. O usuário deverá alterá-la no próximo login.' };
+  }
+
+  async requestPasswordChange(dto: PasswordChangeRequestDto) {
+    const genericResponse = {
+      message: 'Se o usuário existir, a solicitação de alteração de senha foi enviada para o email.',
+    };
+
+    this.eventEmitter.emit('password.change.request', dto);
+
+    return genericResponse;
   }
 }

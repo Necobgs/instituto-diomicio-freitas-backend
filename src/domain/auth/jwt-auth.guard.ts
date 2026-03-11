@@ -28,12 +28,12 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
 
-    const isChangePasswordRoute = request.url.includes('password-change') || request.url.includes('auth/login');
+    const isPasswordChangeRoute = request.url.includes('password-change') && request.method === 'POST';
 
-    // Lógica de bloqueio: se deve mudar a senha e NÃO está na rota de mudança
-    if (user?.mustChangePassword && !isChangePasswordRoute) {
-      throw new UnauthorizedException('Você precisa alterar sua senha padrão.');
+    if (user?.mustChangePassword && !isPasswordChangeRoute) {
+      throw new UnauthorizedException('Usuário deve alterar a senha antes de acessar o sistema');
     }
+
 
     const requiredPermissions =
       this.reflector.getAllAndOverride<AuthorizationDecoratorArgs[]>(

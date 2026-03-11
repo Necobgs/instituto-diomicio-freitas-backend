@@ -6,6 +6,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { FilterDto } from '../shared/filter/filter-dto';
 import { Public } from '../shared/public.decorator';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { PasswordChangeRequestDto } from './dto/password-change-request.dto';
 
 @ApiTags('user')
 @ApiBearerAuth('access-token')
@@ -45,15 +46,23 @@ export class UserController {
     return this.userService.remove(+id);
   }
 
-  @ApiOperation({ summary: 'Change password at first login' })
+  @ApiOperation({ summary: 'Change password with bearer token' })
   @Post('password-change')
-  resetPassword(@Body() dto: ResetPasswordDto, @Request() req) {
-    return this.userService.resetPassword(req.user.id, dto);
+  @Public()
+  resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.userService.resetPassword(dto);
   }
 
   @ApiOperation({ summary: 'Reset user password to default and require change on next login' })
   @Post(':id/reset-to-default-password')
   resetToDefaultPassword(@Param('id') id: string) {
     return this.userService.resetToDefaultPassword(+id);
+  }
+
+  @ApiOperation({ summary: 'Solicitar alteração de senha informando apenas o email (sem login)' })
+  @Public()
+  @Post('password-change-request')
+  requestPasswordChange(@Body() dto: PasswordChangeRequestDto) {
+    return this.userService.requestPasswordChange(dto);
   }
 }

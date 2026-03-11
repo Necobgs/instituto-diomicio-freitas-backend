@@ -1,6 +1,7 @@
 import { Column, Entity, OneToMany } from "typeorm";
 import { AggregateRoot } from "../../shared/aggregate-root";
 import { Student } from "../../student/entities/student.entity";
+import { Monitoring } from "../../monitoring/entities/monitoring.entity";
 
 @Entity({ name: 'enterprises' })
 export class Enterprise extends AggregateRoot {
@@ -16,5 +17,8 @@ export class Enterprise extends AggregateRoot {
 
     @OneToMany(() => Student, student => student.enterprise)
     students?: Student[];
+
+    @OneToMany(() => Monitoring, m => m.enterprise)
+    monitorings?: Monitoring[];
 
 }

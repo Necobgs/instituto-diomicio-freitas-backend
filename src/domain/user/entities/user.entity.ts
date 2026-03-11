@@ -15,32 +15,38 @@ export class User extends AggregateRoot {
     @Column()
     password!: string;
 
-    @Column({ default: true })
-    mustChangePassword!: boolean;
-
     @Column()
     email!: string;
 
     @Column()
     cpf!: string;
 
-    @ManyToOne(()=> Role)
-    @JoinColumn({name:'user_role'})
+    @ManyToOne(() => Role)
+    @JoinColumn({ name: 'user_role' })
     role: Role;
 
     @ManyToMany(() => Permission)
     @JoinTable({
-        name:'users_permissions',
+        name: 'users_permissions',
         joinColumn: {
-            name: 'user_id',    
+            name: 'user_id',
             referencedColumnName: 'id',
         },
         inverseJoinColumn: {
             name: 'permission_id',
             referencedColumnName: 'id',
         }
-        })
+    })
     permissions: Permission[];
+
+    @Column({ name: 'must_change_password', default: true })
+    mustChangePassword!: boolean;
+
+    @Column({ name: 'token_password_change', nullable: true, type: `uuid` })
+    tokenPasswordChange!: string | null;
+
+    @Column({ name: 'token_password_change_expires_at', nullable: true, type: 'time with time zone', })
+    tokenPasswordChangeExpiresAt!: Date | null;
 
     @BeforeInsert()
     async hash_password() {

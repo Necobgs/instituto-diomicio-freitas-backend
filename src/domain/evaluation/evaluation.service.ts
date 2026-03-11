@@ -4,15 +4,31 @@ import { UpdateEvaluationDto } from './dto/update-evaluation.dto';
 import { FilterDto } from '../shared/filter/filter-dto';
 import { EvaluationRepository } from './evaluation.repository';
 import { Evaluation } from './entities/evaluation.entity';
+import { Student } from '../student/entities/student.entity';
+import { User } from '../user/entities/user.entity';
 
 @Injectable()
 export class EvaluationService {
   constructor(
     private readonly repository: EvaluationRepository,
-  ) {}
+  ) { }
 
-  async create(createEvaluationDto: CreateEvaluationDto) {
-    const ev = this.repository.create(createEvaluationDto as any);
+  async create(dto: CreateEvaluationDto) {
+    const student = await this.repository.manager.findOneBy(Student, { id: dto.studentId })
+
+    if (!student) {
+      throw new NotFoundException(`Aluno com id ${dto.studentId} não encontrado`);
+    }
+
+    const user = await this.repository.manager.findOneBy(User, { id: dto.userId })
+
+    if (!user) {
+      throw new NotFoundException(`Usuário com id ${dto.userId} não encontrado`);
+    }
+
+    const { userId, studentId, ...rest } = dto;
+
+    const ev = this.repository.create({ user, student, ...rest } as any as Evaluation);
     return await this.repository.save(ev);
   }
 
@@ -28,9 +44,9 @@ export class EvaluationService {
     return item;
   }
 
-  async existsBy<T extends keyof Evaluation>(key: T, value: Evaluation[T],withDeleted:boolean=true) {
+  async existsBy<T extends keyof Evaluation>(key: T, value: Evaluation[T], withDeleted: boolean = true) {
     return await this.repository.exists({
-      where:{ 
+      where: {
         [key]: value
       },
       withDeleted

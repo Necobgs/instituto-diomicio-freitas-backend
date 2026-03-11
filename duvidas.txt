@@ -1,0 +1,21 @@
+Encaminhamentos
+
+Pode haver mais de um registro de encaminhamento
+para um estudante?
+
+-------------------------------------
+
+Empresas
+
+Há apenas um responsável do RH pra ser contatado por cada empresa
+ou são vários responsáveis?
+
+-------------------------------------
+
+Avaliações
+
+Pode haver mais de uma avaliação para um estudante?
+
+(Pergunta pro Jucemar)
+A avaliação possui data de entrada e data da primeira avaliação,
+mas podemos manter a data de entrada no reigstro do aluno e a data da primeira avaliação na avaliação no created_at do registro da avaliação?

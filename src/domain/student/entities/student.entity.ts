@@ -2,9 +2,10 @@ import { Column, Entity, ManyToOne, OneToMany } from "typeorm";
 import { AggregateRoot } from "../../shared/aggregate-root";
 import { Enterprise } from "../../enterprise/entities/enterprise.entity";
 import { Monitoring } from "../../monitoring/entities/monitoring.entity";
+import { Evaluation } from "../../evaluation/entities/evaluation.entity";
 
-@Entity({name:'students'})
-export class Student extends AggregateRoot{
+@Entity({ name: 'students' })
+export class Student extends AggregateRoot {
 
     @Column()
     name!: string;
@@ -12,10 +13,10 @@ export class Student extends AggregateRoot{
     @Column()
     phone!: string;
 
-    @Column({type:'date'})
+    @Column({ type: 'date' })
     date_birthday!: Date;
 
-    @Column({length:15, unique:true})
+    @Column({ length: 15, unique: true })
     cpf!: string;
 
     @ManyToOne(() => Enterprise, enterprise => enterprise.students)
@@ -23,4 +24,7 @@ export class Student extends AggregateRoot{
 
     @OneToMany(() => Monitoring, monitoring => monitoring.student)
     monitorings?: Monitoring[];
+
+    @OneToMany(() => Evaluation, evaluation => evaluation.student)
+    evaluations?: Evaluation[];
 }
