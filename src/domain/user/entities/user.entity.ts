@@ -2,7 +2,6 @@ import { BeforeInsert, BeforeUpdate, Column, Entity, JoinColumn, JoinTable, Many
 import * as bcrypt from 'bcrypt'
 import { AggregateRoot } from "../../shared/aggregate-root";
 import { encryptPassword } from "../../../utils/encrypt-password";
-import { Role } from "../../role/entities/role.entity";
 import { Permission } from "../../permission/entities/permission.entity";
 
 
@@ -20,10 +19,6 @@ export class User extends AggregateRoot {
 
     @Column()
     cpf!: string;
-
-    @ManyToOne(() => Role)
-    @JoinColumn({ name: 'user_role' })
-    role: Role;
 
     @ManyToMany(() => Permission)
     @JoinTable({

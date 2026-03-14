@@ -12,9 +12,6 @@ import { encryptPassword } from '../../utils/encrypt-password';
 import { AuthorizationDecoratorArgs } from '../shared/authorization/authorization.decorator';
 import { UserWithoutPassDto } from './dto/user-without-pass.dto';
 import { PasswordChangeRequestDto } from './dto/password-change-request.dto';
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Role } from '../role/entities/role.entity';
 import { JwtService } from '@nestjs/jwt';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { randomUUID } from 'crypto';
@@ -27,7 +24,6 @@ export class UserService {
     private readonly configService: ConfigService,
     private readonly emailService: EmailService,
     private readonly jwtService: JwtService,
-    @InjectRepository(Role) private readonly roleRepository: Repository<Role>,
     private readonly eventEmitter: EventEmitter2,
   ) { }
 

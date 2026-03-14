@@ -15,7 +15,6 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { join } from 'path';
 import { PermissionModule } from './domain/permission/permission.module';
-import { RoleModule } from './domain/role/role.module';
 import { JobModule } from './domain/job/job.module';
 import { ReferralModule } from './domain/referral/referral.module';
 
@@ -70,7 +69,6 @@ import { ReferralModule } from './domain/referral/referral.module';
     EvaluationModule,
     AuthModule,
     PermissionModule,
-    RoleModule,
     JobModule,
     ReferralModule
   ],
