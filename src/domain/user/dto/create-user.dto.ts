@@ -1,4 +1,4 @@
-import { IsEmail, IsString, Length, MinLength } from 'class-validator';
+import { IsArray, IsEmail, IsNumber, IsString, Length, MinLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 
@@ -20,5 +20,9 @@ export class CreateUserDto {
 	@IsString()
 	@Length(11, 15)
 	cpf!: string;
+
+	@ApiProperty({ example: [1, 2, 3] })
+	@IsArray()
+	permissionsId!: number[];
 
 }

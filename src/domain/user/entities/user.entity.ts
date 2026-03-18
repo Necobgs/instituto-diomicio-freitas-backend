@@ -14,10 +14,10 @@ export class User extends AggregateRoot {
     @Column()
     password!: string;
 
-    @Column()
+    @Column({ unique: true })
     email!: string;
 
-    @Column()
+    @Column({ unique: true })
     cpf!: string;
 
     @ManyToMany(() => Permission)
@@ -40,7 +40,7 @@ export class User extends AggregateRoot {
     @Column({ name: 'token_password_change', nullable: true, type: `uuid` })
     tokenPasswordChange!: string | null;
 
-    @Column({ name: 'token_password_change_expires_at', nullable: true, type: 'time with time zone', })
+    @Column({ name: 'token_password_change_expires_at', nullable: true, type: 'timestamptz' })
     tokenPasswordChangeExpiresAt!: Date | null;
 
     @BeforeInsert()

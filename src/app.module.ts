@@ -17,6 +17,11 @@ import { join } from 'path';
 import { PermissionModule } from './domain/permission/permission.module';
 import { JobModule } from './domain/job/job.module';
 import { ReferralModule } from './domain/referral/referral.module';
+import { ResourceModule } from './domain/resource/resource.module';
+import { PermissionsMigration1710631234567 } from './migrations/1710631234567-permissions-migration';
+import { ActionsMigration1710631234566 } from './migrations/1710631234566-actions-migration';
+import { ResourcesMigration1710631234565 } from './migrations/1710631234565-resources-migration';
+import { UserFullPermissionsMigration1710631234575 } from './migrations/1710631234575-user-full-permissions-migration';
 
 
 @Module({
@@ -33,7 +38,14 @@ import { ReferralModule } from './domain/referral/referral.module';
         url: configService.get('DATABASE_PG_URL'),
         autoLoadEntities: true,
         synchronize: true,
-        entities: ['dist/**/*.entity.js']
+        entities: ['dist/**/*.entity.js'],
+        migrations: [
+          ActionsMigration1710631234566,
+          ResourcesMigration1710631234565,
+          PermissionsMigration1710631234567,
+          UserFullPermissionsMigration1710631234575
+        ],
+        migrationsRun: true,
       })
     }),
     MailerModule.forRootAsync({
@@ -70,7 +82,8 @@ import { ReferralModule } from './domain/referral/referral.module';
     AuthModule,
     PermissionModule,
     JobModule,
-    ReferralModule
+    ReferralModule,
+    ResourceModule
   ],
   controllers: [AppController],
   providers: [AppService],

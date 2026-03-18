@@ -2,5 +2,6 @@ export const Actions = {
     create: 'create',
     read: 'read',
     update: 'update',
-    delete: 'delete'
+    delete: 'delete',
+    all: 'all'
 }

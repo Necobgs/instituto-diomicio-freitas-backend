@@ -18,7 +18,6 @@ import { PermissionDto } from './dto/permission.dto';
 
 @ApiTags('permission')
 @ApiBearerAuth()
-@Authorization({ resource: Resources.permissions, actions: [Actions.read] })
 @Controller('permission')
 export class PermissionController {
   constructor(private readonly permissionService: PermissionService) { }

@@ -2,6 +2,7 @@ import {
     Entity,
     Column,
     ManyToOne,
+    JoinColumn,
 } from 'typeorm';
 import { AggregateRoot } from '../../shared/aggregate-root';
 import { User } from '../../user/entities/user.entity';
@@ -10,12 +11,12 @@ import { Student } from '../../student/entities/student.entity';
 @Entity('evaluations')
 export class Evaluation extends AggregateRoot {
 
-    @Column({ name: 'student_id' })
     @ManyToOne(() => Student, (student) => student.evaluations)
+    @JoinColumn({ name: 'student_id' })
     student: Student;
 
-    @Column({ name: 'user_id' })
     @ManyToOne(() => User)
+    @JoinColumn({ name: 'user_id' })
     user: User;
 
     @Column({ type: 'date', name: 'entry_date' })

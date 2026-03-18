@@ -31,18 +31,14 @@ export class UserService {
     const user = this.repository.create(dto);
     user.password = DEFAULT_PASSWORD;
 
-    if (dto.email) {
-      const exists = await this.existsBy('email', dto.email)
-      if (exists) {
-        throw new BadRequestException('Usuário com o email já existe');
-      }
+    const existsEmail = await this.existsBy('email', dto.email)
+    if (existsEmail) {
+      throw new BadRequestException('Usuário com o email já existe');
     }
 
-    if (dto.cpf) {
-      const exists = await this.existsBy('cpf', dto.cpf)
-      if (exists) {
-        throw new BadRequestException('Usuário com o cpf já existe');
-      }
+    const existsCpf = await this.existsBy('cpf', dto.cpf)
+    if (existsCpf) {
+      throw new BadRequestException('Usuário com o cpf já existe');
     }
 
     const { password, ...result } = await this.repository.save(user);
@@ -108,20 +104,17 @@ export class UserService {
   }
 
   async resetPassword(dto: ResetPasswordDto) {
-    const user = await this.repository.preload({
-      tokenPasswordChange: dto.token,
-      password: await encryptPassword(dto.newPassword),
-      mustChangePassword: false,
-    });
+    const user = await this.findOneBy('tokenPasswordChange', dto.token);
 
     if (!user || (user.tokenPasswordChangeExpiresAt && user.tokenPasswordChangeExpiresAt < new Date())) {
       throw new NotFoundException('Usuário não encontrado para alteração de senha');
     }
 
-    user.tokenPasswordChange = null;
-    user.tokenPasswordChangeExpiresAt = null;
-
-    await this.repository.save(user);
+    await this.repository.update(user.id, {
+      password: await encryptPassword(dto.newPassword),
+      mustChangePassword: false,
+      tokenPasswordChange: null
+    });
 
     return {
       message: 'Senha alterada com sucesso',
@@ -130,32 +123,35 @@ export class UserService {
 
   @OnEvent('password.change.request')
   async sendPasswordChangeEmail(dto: PasswordChangeRequestDto) {
+    try {
+      const user = await this.repository.findOneBy({
+        email: dto.email,
+      });
 
-    const user = await this.repository.preload({
-      email: dto.email,
-      tokenPasswordChange: randomUUID(),
-      tokenPasswordChangeExpiresAt: new Date(Date.now() + 60 * 60 * 1000),
-    });
+      if (!user) {
+        return;
+      }
 
-    console.log(user)
+      user.tokenPasswordChange = randomUUID();
+      user.tokenPasswordChangeExpiresAt = new Date(Date.now() + 60 * 60 * 1000);
 
-    if (!user) {
-      return;
+      const resetToken = user.tokenPasswordChange;
+
+      const frontendUrl = this.configService.get('PASSWORD_RESET_URL');
+      const resetLink = `${frontendUrl}?token=${resetToken}`;
+
+      await this.repository.save(user);
+
+      await this.emailService.sendEmail(
+        user.email,
+        'Redefinição de Senha - Instituto Diomício Freitas',
+        'password-recovery',
+        { data: resetLink, year: new Date().getFullYear() },
+      );
+      return resetToken;
+    } catch (error) {
+      console.error('Erro no evento password.change.request:', error);
     }
-
-    const resetToken = user.tokenPasswordChange;
-
-    const frontendUrl = this.configService.get('PASSWORD_RESET_URL');
-    const resetLink = `${frontendUrl}?token=${resetToken}`;
-
-    console.log(await this.repository.save(user));
-
-    await this.emailService.sendEmail(
-      user.email,
-      'Redefinição de Senha - Instituto Diomício Freitas',
-      'password-recovery',
-      { data: resetLink, year: new Date().getFullYear() },
-    );
   }
 
   async hasPermissions(userId: number, permissions: AuthorizationDecoratorArgs[]) {
