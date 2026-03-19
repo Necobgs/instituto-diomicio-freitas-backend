@@ -11,4 +11,4 @@ import { EvaluationRepository } from './evaluation.repository';
   providers: [EvaluationService, EvaluationRepository],
   exports: [EvaluationService, EvaluationRepository],
 })
-export class EvaluationModule {}
+export class EvaluationModule { }

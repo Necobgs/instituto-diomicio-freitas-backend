@@ -155,40 +155,55 @@ export class UserService {
   }
 
   async hasPermissions(userId: number, permissions: AuthorizationDecoratorArgs[]) {
-    if (permissions.length === 0) {
+    // 1. Otimização: Se não há permissões exigidas, acesso liberado.
+    if (!permissions || permissions.length === 0) {
       return true;
     }
 
     const qb = this.repository
       .createQueryBuilder('user')
       .where('user.id = :userId', { userId })
-      .andWhere('user.deleted_at IS NULL')
-      .select('1');
+      .andWhere('user.deleted_at IS NULL');
 
-    permissions.forEach((perm, index) => {
+    for (let index = 0; index < permissions.length; index++) {
+      const perm = permissions[index];
+
+      // 2. Prevenção de erro IN () no BD
+      if (!perm.actions || perm.actions.length === 0) {
+        continue; // Se não tem ações específicas para validar, pode ignorar ou retornar false dependendo da sua regra de negócio
+      }
+
+      const resKey = `res_${index}`;
+      const actsKey = `acts_${index}`;
+      const countKey = `count_${index}`;
+
       qb.andWhere(
-        `
-        EXISTS (
+        `EXISTS (
           SELECT 1
           FROM users_permissions up
           INNER JOIN permissions p ON p.id = up.permission_id
-          WHERE up.user_id = "user"."id"
-            AND p.resource = :resource_${index}
-            AND p.action IN (:...actions_${index})
+          INNER JOIN resources r ON r.id = p.resource_id
+          INNER JOIN actions a ON a.id = p.action_id
+          WHERE up.user_id = "user".id /* <-- Aspas adicionadas na palavra reservada */
+            AND r.identifier = :${resKey}
+            AND a.identifier IN (:...${actsKey})
             AND p.deleted_at IS NULL
-          GROUP BY p.resource
-          HAVING COUNT(DISTINCT p.action) = :actionsCount_${index}
-        )
-        `,
+            AND r.deleted_at IS NULL /* <-- Checagem de soft-delete adicionada */
+            AND a.deleted_at IS NULL /* <-- Checagem de soft-delete adicionada */
+          GROUP BY up.user_id /* <-- Group By adicionado */
+          HAVING COUNT(DISTINCT a.identifier) = :${countKey}
+        )`,
         {
-          [`resource_${index}`]: perm.resource,
-          [`actions_${index}`]: perm.actions,
-          [`actionsCount_${index}`]: perm.actions.length,
+          [resKey]: perm.resource,
+          [actsKey]: perm.actions,
+          [countKey]: perm.actions.length,
         },
       );
-    });
-    return qb.getExists();
+    }
+
+    return (await qb.getRawOne()) !== undefined;
   }
+
 
   async resetToDefaultPassword(id: number) {
     const user = await this.repository.preload({

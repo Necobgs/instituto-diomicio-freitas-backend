@@ -13,7 +13,11 @@ export class PermissionService {
   }
 
   async findAll(filter: FilterDto) {
-    return await this.permissionRepository.filterAll(filter);
+    const qb = this.permissionRepository.getFilteredQueryBuilder(filter)
+      .leftJoin('entity.resource', 'resource')
+      .leftJoin('entity.action', 'action')
+      .select(['entity.id', 'resource.name', 'action.name']);
+    return await this.permissionRepository.returnFilterAll(filter, qb);
   }
 
   async findOne(id: number) {

@@ -6,8 +6,6 @@ export class PermissionsMigration1710631234567 implements MigrationInterface {
         const resources = await queryRunner.query(`SELECT id FROM resources`);
         const actions = await queryRunner.query(`SELECT id FROM actions`);
 
-        console.log(resources);
-        console.log(actions);
 
         for (const resource of resources) {
             for (const action of actions) {

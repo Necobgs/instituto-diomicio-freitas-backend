@@ -1,9 +1,7 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { PermissionService } from './permission.service';
 import { FilterDto } from '../shared/filter/filter-dto';
-import { Authorization } from '../shared/authorization/authorization.decorator';
-import { Resources } from '../../consts/resources';
-import { Actions } from '../../consts/actions';
+
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -15,9 +13,10 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { PermissionDto } from './dto/permission.dto';
+import { Public } from '../shared/public.decorator';
 
 @ApiTags('permission')
-@ApiBearerAuth()
+@ApiBearerAuth('access-token')
 @Controller('permission')
 export class PermissionController {
   constructor(private readonly permissionService: PermissionService) { }
@@ -26,7 +25,6 @@ export class PermissionController {
   @ApiOperation({ summary: 'Listar permissões' })
   @ApiOkResponse({ type: [PermissionDto] })
   @ApiUnauthorizedResponse({ description: 'Token JWT ausente ou inválido' })
-  @ApiForbiddenResponse({ description: 'Sem permissão para listar permissões' })
   async findAll(@Query() filter: FilterDto) {
     return await this.permissionService.findAll(filter);
   }

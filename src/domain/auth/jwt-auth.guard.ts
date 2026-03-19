@@ -23,6 +23,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     if (isPublic) return true;
 
     const canActivate = await super.canActivate(context);
+
     if (!canActivate) return false;
 
     const request = context.switchToHttp().getRequest();
@@ -41,11 +42,13 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         [context.getHandler(), context.getClass()],
       );
 
+
     // 2️ Se não exige permissão, só JWT já basta
     if (!requiredPermissions?.length) return true;
 
     const req = context.switchToHttp().getRequest();
     const userId = req.user?.id;
+
 
     if (!userId) {
       throw new UnauthorizedException();

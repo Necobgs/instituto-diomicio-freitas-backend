@@ -4,6 +4,9 @@ import { StudentService } from './student.service';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import { FilterDto } from '../shared/filter/filter-dto';
+import { Authorization } from '../shared/authorization/authorization.decorator';
+import { Resources } from '../../consts/resources';
+import { Actions } from '../../consts/actions';
 
 @ApiTags('student')
 @ApiBearerAuth('access-token')
@@ -12,6 +15,7 @@ export class StudentController {
   constructor(private readonly studentService: StudentService) { }
 
   @ApiOperation({ summary: 'Create a new student' })
+  @Authorization({ resource: Resources.student, actions: [Actions.create] })
   @Post()
   create(@Body() createStudentDto: CreateStudentDto) {
     return this.studentService.create(createStudentDto);

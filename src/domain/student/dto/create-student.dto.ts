@@ -1,4 +1,4 @@
-import { IsString, IsDateString, IsBoolean, IsOptional, Length, IsNumber, IsPositive, MaxDate } from 'class-validator';
+import { IsString, IsDateString, IsBoolean, IsOptional, Length, IsNumber, IsPositive, MaxDate, IsDate } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -14,10 +14,10 @@ export class CreateStudentDto {
 	phone!: string;
 
 	@ApiProperty({ example: '2000-01-01' })
-	@IsDateString()
 	@Type(() => Date)
+	@IsDate()
 	@MaxDate(new Date())
-	date_birthday!: string;
+	date_birthday!: Date;
 
 	@ApiProperty({ example: '12345678901' })
 	@IsString()
