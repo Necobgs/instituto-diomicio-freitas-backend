@@ -21,7 +21,12 @@ export class PermissionService {
   }
 
   async findOne(id: number) {
-    const permission = await this.permissionRepository.findOneBy({ id });
+    const permission = await this.permissionRepository.createQueryBuilder('entity')
+      .leftJoin('entity.resource', 'resource')
+      .leftJoin('entity.action', 'action')
+      .select(['entity.id', 'resource.name', 'action.name'])
+      .where('entity.id = :id', { id })
+      .getOne();
     if (!permission) throw new BadRequestException(`Permissão de id '${id}' não encontrado`)
     return permission;
   }

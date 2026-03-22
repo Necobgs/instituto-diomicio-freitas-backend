@@ -23,7 +23,6 @@ export class UserController {
 
   @ApiOperation({ summary: 'Retrieve all users' })
   @Get()
-  @ApiQuery({ type: FilterDto })
   findAll(@Query() dto: FilterDto) {
     return this.userService.findAll(dto);
   }
@@ -32,6 +31,12 @@ export class UserController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.userService.findOneBy('id', +id);
+  }
+
+  @ApiOperation({ summary: 'Retrieve a single user by ID' })
+  @Get(':id/permissions')
+  findPermissions(@Param('id') id: string) {
+    return this.userService.getUserPermissions(+id);
   }
 
   @ApiOperation({ summary: 'Update an existing user by ID' })

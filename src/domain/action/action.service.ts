@@ -1,15 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ActionRepository } from './action.repository';
-import { FilterDto } from '../shared/filter/filter-dto';
 import { Action } from './entities/action.entity';
+import { Filter } from '../shared/filter/apply-filters';
 
 @Injectable()
 export class ActionService {
 
   constructor(private readonly repository: ActionRepository) { }
 
-  async findAll(dto: FilterDto) {
-    return await this.repository.filterAll(dto);
+  async findAll(dto: Filter) {
+    return await this.repository.getFilteredQueryBuilder(dto, [], false)
+      .select(
+        ['entity.id', 'entity.name', 'entity.identifier']
+      ).getMany();
   }
 
   async findOneBy<T extends keyof Action>(key: T, value: Action[T]) {

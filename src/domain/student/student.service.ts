@@ -64,7 +64,15 @@ export class StudentService {
   }
 
   async remove(id: number) {
-    const student = await this.findOneBy('id', id);
+    const student = await this.repository.findOne({
+      where: { id },
+      relations: ['evaluations', 'monitorings'],
+    });
+
+    if (!student) {
+      throw new NotFoundException(`Aluno com id ${id} não encontrado`);
+    }
+
     return await this.repository.softRemove(student);
   }
 }

@@ -19,7 +19,6 @@ export class EnterpriseController {
 
   @ApiOperation({ summary: 'List all enterprises' })
   @Get()
-  @ApiQuery({ type: FilterDto })
   findAll(@Query() dto: FilterDto) {
     return this.enterpriseService.findAll(dto);
   }

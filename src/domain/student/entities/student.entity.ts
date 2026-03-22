@@ -22,9 +22,9 @@ export class Student extends AggregateRoot {
     @ManyToOne(() => Enterprise, enterprise => enterprise.students)
     enterprise?: Enterprise;
 
-    @OneToMany(() => Monitoring, monitoring => monitoring.student)
+    @OneToMany(() => Monitoring, monitoring => monitoring.student, { cascade: ['soft-remove', 'insert', 'update', 'recover'] })
     monitorings?: Monitoring[];
 
-    @OneToMany(() => Evaluation, evaluation => evaluation.student)
+    @OneToMany(() => Evaluation, evaluation => evaluation.student, { cascade: ['soft-remove', 'insert', 'update', 'recover'] })
     evaluations?: Evaluation[];
 }

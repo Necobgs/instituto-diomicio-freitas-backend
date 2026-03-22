@@ -32,142 +32,142 @@ export class Evaluation extends AggregateRoot {
     note: number;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q01: number;
+    q01: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q02: number;
+    q02: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q03: number;
+    q03: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q04: number;
+    q04: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q05: number;
+    q05: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q06: number;
+    q06: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q07: number;
+    q07: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q08: number;
+    q08: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q09: number;
+    q09: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q10: number;
+    q10: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q11: number;
+    q11: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q12: number;
+    q12: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q13: number;
+    q13: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q14: number;
+    q14: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q15: number;
+    q15: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q16: number;
+    q16: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q17: number;
+    q17: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q18: number;
+    q18: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q19: number;
+    q19: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q20: number;
+    q20: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q21: number;
+    q21: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q22: number;
+    q22: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q23: number;
+    q23: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q24: number;
+    q24: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q25: number;
+    q25: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q26: number;
+    q26: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q27: number;
+    q27: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q28: number;
+    q28: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q29: number;
+    q29: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q30: number;
+    q30: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q31: number;
+    q31: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q32: number;
+    q32: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q33: number;
+    q33: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q34: number;
+    q34: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q35: number;
+    q35: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q36: number;
+    q36: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q37: number;
+    q37: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q38: number;
+    q38: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q39: number;
+    q39: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q40: number;
+    q40: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q41: number;
+    q41: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q42: number;
+    q42: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q43: number;
+    q43: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q44: number;
+    q44: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q45: number;
+    q45: string;
 
     @Column({ type: 'char', length: 1, nullable: false })
-    q46: number;
+    q46: string;
 
     @Column({ type: 'varchar', nullable: false })
     q47: string;

@@ -1,7 +1,10 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ResourceService } from './resource.service';
 import { FilterDto } from '../shared/filter/filter-dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('resourcers')
+@ApiBearerAuth('access-token')
 @Controller('resource')
 export class ResourceController {
   constructor(private readonly resourceService: ResourceService) { }

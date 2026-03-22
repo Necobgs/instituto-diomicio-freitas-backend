@@ -15,6 +15,8 @@ import { PasswordChangeRequestDto } from './dto/password-change-request.dto';
 import { JwtService } from '@nestjs/jwt';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { randomUUID } from 'crypto';
+import { Permission } from '../permission/entities/permission.entity';
+import { In } from 'typeorm';
 
 @Injectable()
 export class UserService {
@@ -41,14 +43,20 @@ export class UserService {
       throw new BadRequestException('Usuário com o cpf já existe');
     }
 
+    if (dto.permissionsId) {
+      const permissions = await this.repository.manager.findBy(Permission, { id: In(dto.permissionsId) })
+      if (permissions.length !== dto.permissionsId.length) {
+        throw new BadRequestException('Algumas permissões não foram encontradas');
+      }
+      user.permissions = permissions;
+    }
+
     const { password, ...result } = await this.repository.save(user);
     return result;
   }
 
   async findAll(dto: FilterDto) {
-    const result = await this.repository.filterAll(dto);
-    result.items = result.items.map(({ password, ...user }) => user) as User[];
-    return result;
+    return await this.repository.filterAll(dto);
   }
 
   async findOneBy<T extends keyof User>(key: T, value: User[T]): Promise<UserWithoutPassDto> {
@@ -87,6 +95,7 @@ export class UserService {
       if (exists) {
         throw new BadRequestException('Usuário com o email já existe');
       }
+      user.email = dto.email;
     }
 
     if (dto.cpf) {
@@ -94,7 +103,17 @@ export class UserService {
       if (exists) {
         throw new BadRequestException('Usuário com o cpf já existe');
       }
+      user.cpf = dto.cpf;
     }
+
+    if (dto.permissionsId) {
+      const permissions = await this.repository.manager.findBy(Permission, { id: In(dto.permissionsId) })
+      if (permissions.length !== dto.permissionsId.length) {
+        throw new BadRequestException('Algumas permissões não foram encontradas');
+      }
+      user.permissions = permissions;
+    }
+
     return await this.repository.save(user);
   }
 
@@ -104,7 +123,18 @@ export class UserService {
   }
 
   async resetPassword(dto: ResetPasswordDto) {
-    const user = await this.findOneBy('tokenPasswordChange', dto.token);
+    const user = await this.repository.findOne({
+      where: {
+        tokenPasswordChange: dto.token
+      },
+      select: {
+        id: true,
+        tokenPasswordChange: true,
+        tokenPasswordChangeExpiresAt: true,
+        password: true,
+        mustChangePassword: true
+      }
+    });
 
     if (!user || (user.tokenPasswordChangeExpiresAt && user.tokenPasswordChangeExpiresAt < new Date())) {
       throw new NotFoundException('Usuário não encontrado para alteração de senha');
@@ -228,5 +258,27 @@ export class UserService {
     this.eventEmitter.emit('password.change.request', dto);
 
     return genericResponse;
+  }
+
+  async getUserPermissions(id: number) {
+
+    const user = await this.repository.findOne({
+      where: { id },
+      select: {
+        id: true,
+        permissions: {
+          id: true,
+          resource: { 'id': true, 'name': true, 'identifier': true },
+          action: { 'id': true, 'name': true, 'identifier': true }
+        }
+      },
+      relations: ['permissions', 'permissions.resource', 'permissions.action']
+    })
+
+    if (!user) {
+      throw new NotFoundException(`Usuário com id ${id} não encontrado`);
+    }
+
+    return user.permissions;
   }
 }

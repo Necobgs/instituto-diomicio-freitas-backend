@@ -1,4 +1,4 @@
-import { IsArray, IsEmail, IsNumber, IsString, Length, MinLength } from 'class-validator';
+import { ArrayUnique, IsArray, IsEmail, IsNumber, IsPositive, IsString, Length, MinLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 
@@ -23,6 +23,9 @@ export class CreateUserDto {
 
 	@ApiProperty({ example: [1, 2, 3] })
 	@IsArray()
+	@IsNumber({}, { each: true })
+	@IsPositive({ each: true })
+	@ArrayUnique()
 	permissionsId!: number[];
 
 }

@@ -1,5 +1,4 @@
-import { BeforeInsert, BeforeUpdate, Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne } from "typeorm";
-import * as bcrypt from 'bcrypt'
+import { BeforeInsert, Column, Entity, JoinTable, ManyToMany } from "typeorm";
 import { AggregateRoot } from "../../shared/aggregate-root";
 import { encryptPassword } from "../../../utils/encrypt-password";
 import { Permission } from "../../permission/entities/permission.entity";
@@ -11,7 +10,7 @@ export class User extends AggregateRoot {
     @Column()
     username!: string
 
-    @Column()
+    @Column({ select: false })
     password!: string;
 
     @Column({ unique: true })
@@ -37,10 +36,10 @@ export class User extends AggregateRoot {
     @Column({ name: 'must_change_password', default: true })
     mustChangePassword!: boolean;
 
-    @Column({ name: 'token_password_change', nullable: true, type: `uuid` })
+    @Column({ name: 'token_password_change', nullable: true, type: `uuid`, select: false })
     tokenPasswordChange!: string | null;
 
-    @Column({ name: 'token_password_change_expires_at', nullable: true, type: 'timestamptz' })
+    @Column({ name: 'token_password_change_expires_at', nullable: true, type: 'timestamptz', select: false })
     tokenPasswordChangeExpiresAt!: Date | null;
 
     @BeforeInsert()

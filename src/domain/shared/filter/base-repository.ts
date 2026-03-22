@@ -6,7 +6,7 @@ import {
   SelectQueryBuilder,
 } from 'typeorm';
 import { applyFilters, Filter } from './apply-filters';
-import {FilterDto } from './filter-dto'
+import { FilterDto } from './filter-dto'
 
 export interface ResponseFilterMany<T extends ObjectLiteral> {
   items: T[];
@@ -25,51 +25,65 @@ export abstract class BaseRepository<
     super(target, dataSource.manager);
   }
 
-  async filterExists(filter: Filter,entities?:string[]): Promise<boolean> {
-    return this.getFilteredQueryBuilder(filter,entities).getExists();
+  async filterAllNoPagination(filter: Filter, entities?: string[]): Promise<T[]> {
+    return this.getFilteredQueryBuilder(filter, entities, false).getMany();
   }
 
-  async filterOne(filter: Filter,entities?:string[]): Promise<T | null> {
-    return (await this.getFilteredQueryBuilder(filter,entities).getOne()) ?? null;
+  async filterExists(filter: Filter, entities?: string[]): Promise<boolean> {
+    return this.getFilteredQueryBuilder(filter, entities).getExists();
   }
 
-  async filterAll(filter: FilterDto,entities?:string[]) : Promise<ResponseFilterMany<T>> {
-    const qb = await this.getFilteredQueryBuilder(filter,entities);
-    return this.returnFilterAll(filter,qb)
+  async filterOne(filter: Filter, entities?: string[]): Promise<T | null> {
+    return (await this.getFilteredQueryBuilder(filter, entities).getOne()) ?? null;
   }
 
-  async returnFilterAll(filter:FilterDto,qb:SelectQueryBuilder<T>){
-    const [ items, count ] = await qb.getManyAndCount();
+  async filterAll(filter: FilterDto, entities?: string[]): Promise<ResponseFilterMany<T>> {
+    const qb = await this.getFilteredQueryBuilder(filter, entities);
+    return this.returnFilterAll(filter, qb)
+  }
+
+  async returnFilterAll(filter: FilterDto, qb: SelectQueryBuilder<T>) {
+    const [items, count] = await qb.getManyAndCount();
     return {
-      items:items, 
-      count:count,
-      limit:filter!.limit,
-      page:filter!.page
+      items: items,
+      count: count,
+      limit: filter!.limit,
+      page: filter!.page
     };
   }
 
-  getFilteredQueryBuilder(filter: FilterDto | Filter,entities?:string[]): SelectQueryBuilder<T> {
+  getFilteredQueryBuilder(filter: FilterDto | Filter, entities?: string[], withPagination: boolean = true): SelectQueryBuilder<T> {
     let qb = this.manager.createQueryBuilder(this.target, 'entity');
     let limit = 10
     let page = 1 - 1
     let skip = limit * page
-    qb = this.addRelations(qb,entities);
-    if (filter){
-      qb = applyFilters(qb, this.target, 'entity',filter instanceof FilterDto ? filter.filter : filter);
-      if(filter instanceof FilterDto){
+    qb = this.addRelations(qb, entities);
+    if (filter) {
+      if (filter instanceof FilterDto) {
+        if (filter.withDeleted || filter.onlyDeleted) {
+          qb = qb.withDeleted();
+        }
+        if (filter.onlyDeleted) {
+          qb = qb.andWhere('entity.deleted_at IS NOT NULL');
+        }
+      }
+      qb = applyFilters(qb, this.target, 'entity', filter instanceof FilterDto ? filter.filter : filter);
+      if (filter instanceof FilterDto && withPagination) {
         limit = filter.limit ?? 10
         page = filter.page > 0 ? filter.page - 1 : filter.page
         skip = limit * page
       }
     }
-    qb = qb.take(limit).skip(skip)
+    if (withPagination) {
+      qb = qb.take(limit).skip(skip)
+    }
     return qb;
   }
 
-  addRelations(qb: SelectQueryBuilder<T>,entities?:string[]): SelectQueryBuilder<T> {
+  addRelations(qb: SelectQueryBuilder<T>, entities?: string[]): SelectQueryBuilder<T> {
     const metadata = this.manager.connection.getMetadata(this.target);
     metadata.relations
-      .filter((relation) => 
+      .filter((relation) =>
         relation.isEager || entities?.includes(relation.propertyName)
       )
       .forEach((relation) => {

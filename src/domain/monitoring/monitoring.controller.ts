@@ -19,7 +19,6 @@ export class MonitoringController {
 
   @ApiOperation({ summary: 'List all monitoring records' })
   @Get()
-  @ApiQuery({ type: FilterDto })
   findAll(@Query() dto: FilterDto) {
     return this.monitoringService.findAll(dto);
   }

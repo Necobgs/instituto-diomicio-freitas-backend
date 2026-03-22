@@ -19,15 +19,14 @@ export class EvaluationController {
 
   @ApiOperation({ summary: 'List all evaluations' })
   @Get()
-  @ApiQuery({ type: FilterDto })
   findAll(@Query() dto: FilterDto) {
     return this.evaluationService.findAll(dto);
   }
 
   @ApiOperation({ summary: 'Get evaluation by ID' })
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.evaluationService.findOneBy('id', +id);
+  findOneById(@Param('id') id: string) {
+    return this.evaluationService.findOneById(+id);
   }
 
   @ApiOperation({ summary: 'Update evaluation by ID' })

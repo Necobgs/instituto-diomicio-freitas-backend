@@ -16,6 +16,8 @@ Avaliações
 
 Pode haver mais de uma avaliação para um estudante?
 
+Por regra, a avaliação deve ser feita de quanto tempo em quanto tempo? ou isso não há determinado?
+
 (Pergunta pro Jucemar)
 A avaliação possui data de entrada e data da primeira avaliação,
 mas podemos manter a data de entrada no reigstro do aluno e a data da primeira avaliação na avaliação no created_at do registro da avaliação?

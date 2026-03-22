@@ -5,7 +5,10 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class FilterDto{
   
-  @ApiPropertyOptional({ description: 'JSON object containing filter criteria' })
+  @ApiPropertyOptional({ 
+    description: 'JSON string containing filter criteria. Example: {"name":{"$like":"%2.%"}}',
+    type: String 
+  })
   @IsOptional()
   filter: Filter;
 
@@ -26,4 +29,14 @@ export class FilterDto{
     return Number(value);
   })
   limit: number = 10;
+
+  @ApiPropertyOptional({ description: 'Include deleted records', type: Boolean })
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  withDeleted?: boolean;
+
+  @ApiPropertyOptional({ description: 'Return only deleted records', type: Boolean })
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  onlyDeleted?: boolean;
 }

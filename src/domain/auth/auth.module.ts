@@ -14,12 +14,12 @@ import { UserModule } from '../user/user.module';
   imports: [
     PassportModule,
     JwtModule.registerAsync({
-      imports:[ConfigModule],
-      inject:[ConfigService],
-      useFactory: (configService:ConfigService) => ({
-      secret: configService.get('JWT_SECRET'), // Substitua por uma variável de ambiente
-      signOptions: { expiresIn: '1h' },
-    })
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get('JWT_SECRET'), // Substitua por uma variável de ambiente
+        signOptions: { expiresIn: '5d' },
+      })
     }),
     UserModule
   ],
@@ -33,4 +33,4 @@ import { UserModule } from '../user/user.module';
     },
   ],
 })
-export class AuthModule {}
+export class AuthModule { }

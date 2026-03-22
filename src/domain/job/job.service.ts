@@ -1,6 +1,4 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { Job } from './entities/job.entity';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
@@ -14,6 +12,10 @@ export class JobService {
     ) { }
 
     async create(createJobDto: CreateJobDto) {
+        const exists = await this.existsBy('name', createJobDto.name);
+        if (exists) {
+            throw new BadRequestException(`Função com nome ${createJobDto.name} já existe`);
+        }
         const newJob = this.repository.create(createJobDto);
         return await this.repository.save(newJob);
     }
@@ -33,13 +35,13 @@ export class JobService {
     async update(id: number, dto: UpdateJobDto) {
         const job = await this.repository.preload({ id, ...dto });
         if (!job) {
-            throw new NotFoundException(`Job com ID ${id} não encontrado`);
+            throw new NotFoundException(`Função com ID ${id} não encontrada`);
         }
 
         if (dto.name) {
             const exists = await this.existsBy('name', dto.name);
             if (exists) {
-                throw new BadRequestException(`Job com nome ${dto.name} já existe`);
+                throw new BadRequestException(`Função com nome ${dto.name} já existe`);
             }
         }
 

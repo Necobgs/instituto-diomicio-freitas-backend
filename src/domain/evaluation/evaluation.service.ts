@@ -28,12 +28,39 @@ export class EvaluationService {
 
     const { userId, studentId, ...rest } = dto;
 
-    const ev = this.repository.create({ user, student, ...rest } as any as Evaluation);
-    return await this.repository.save(ev);
+    const evaluation = this.repository.create({ user, student, ...rest } as any as Evaluation);
+    return await this.repository.save(evaluation);
   }
 
   async findAll(dto: FilterDto) {
-    return await this.repository.filterAll(dto);
+    return await this.repository.getFilteredQueryBuilder(dto).setFindOptions({
+      relations: ['student', 'user'],
+      select: {
+        id: true,
+        entryDate: true,
+        date: true,
+        interviewNote: true,
+        note: true,
+        created_at: true,
+        updated_at: true,
+        deleted_at: true,
+        student: {
+          name: true
+        },
+        user: {
+          username: true
+        }
+      }
+    }).getMany();
+  }
+
+  async findOneById(id: number) {
+    return await this.repository.findOne({
+      where: {
+        id
+      },
+      relations: ['student', 'user'],
+    });
   }
 
   async findOneBy<T extends keyof Evaluation>(key: T, value: Evaluation[T]) {

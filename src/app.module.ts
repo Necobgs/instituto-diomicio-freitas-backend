@@ -22,6 +22,7 @@ import { PermissionsMigration1710631234567 } from './migrations/1710631234567-pe
 import { ActionsMigration1710631234566 } from './migrations/1710631234566-actions-migration';
 import { ResourcesMigration1710631234565 } from './migrations/1710631234565-resources-migration';
 import { UserFullPermissionsMigration1710631234575 } from './migrations/1710631234575-user-full-permissions-migration';
+import { ActionModule } from './domain/action/action.module';
 
 
 @Module({
@@ -83,7 +84,8 @@ import { UserFullPermissionsMigration1710631234575 } from './migrations/17106312
     PermissionModule,
     JobModule,
     ReferralModule,
-    ResourceModule
+    ResourceModule,
+    ActionModule
   ],
   controllers: [AppController],
   providers: [AppService],

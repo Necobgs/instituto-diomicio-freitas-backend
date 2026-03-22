@@ -2,10 +2,11 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestj
 import { JobService } from './job.service';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { FilterDto } from '../shared/filter/filter-dto';
 
 @ApiTags('Jobs')
+@ApiBearerAuth('access-token')
 @Controller('job')
 export class JobController {
     constructor(private readonly jobService: JobService) { }

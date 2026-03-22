@@ -1,19 +1,23 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ActionService } from './action.service';
-import { FilterDto } from '../shared/filter/filter-dto';
+import { Filter } from '../shared/filter/apply-filters';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 
+
+@ApiTags('Actions')
+@ApiBearerAuth("access-token")
 @Controller('action')
 export class ActionController {
   constructor(private readonly actionService: ActionService) { }
 
   @Get()
-  findAll(@Query() dto: FilterDto) {
+  @ApiQuery({
+    name: 'filter',
+    type: 'string',
+    required: false,
+    description: 'Filtro para ações'
+  })
+  findAll(@Query('filter') dto: Filter) {
     return this.actionService.findAll(dto);
   }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.actionService.findOneBy('id', +id);
-  }
-
 }

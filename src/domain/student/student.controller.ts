@@ -23,7 +23,6 @@ export class StudentController {
 
   @ApiOperation({ summary: 'List all students' })
   @Get()
-  @ApiQuery({ type: FilterDto })
   findAll(@Query() dto: FilterDto) {
     return this.studentService.findAll(dto);
   }
