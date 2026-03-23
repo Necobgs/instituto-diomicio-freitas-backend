@@ -1,7 +1,7 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ResourceService } from './resource.service';
-import { FilterDto } from '../shared/filter/filter-dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Filter } from '../shared/filter/apply-filters';
 
 @ApiTags('resourcers')
 @ApiBearerAuth('access-token')
@@ -10,7 +10,7 @@ export class ResourceController {
   constructor(private readonly resourceService: ResourceService) { }
 
   @Get()
-  findAll(@Query() dto: FilterDto) {
+  findAll(@Query() dto: Filter) {
     return this.resourceService.findAll(dto);
   }
 

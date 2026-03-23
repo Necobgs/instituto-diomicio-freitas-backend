@@ -71,8 +71,15 @@ export class UserService {
   }
 
   async findFullUserBy<T extends keyof User>(key: T, value: User[T]) {
-    return await this.repository.findOneBy({
-      [key]: value
+    return await this.repository.findOne({
+      where: {
+        [key]: value,
+      },
+      select: {
+        id: true,
+        email: true,
+        password: true
+      },
     });
   }
 
