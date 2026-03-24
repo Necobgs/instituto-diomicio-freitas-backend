@@ -40,7 +40,7 @@ export class JobService {
 
         if (dto.name) {
             const exists = await this.existsBy('name', dto.name);
-            if (exists) {
+            if (exists && job.name !== dto.name) {
                 throw new BadRequestException(`Função com nome ${dto.name} já existe`);
             }
         }

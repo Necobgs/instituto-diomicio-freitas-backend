@@ -51,6 +51,14 @@ export class StudentService {
       throw new NotFoundException(`Aluno com id ${id} não encontrado`);
     }
 
+    if (dto.cpf) {
+      const exists = await this.existsBy('cpf', dto.cpf)
+      if (exists && student.cpf !== dto.cpf) {
+        throw new BadRequestException('Aluno com o cpf já existe');
+      }
+      student.cpf = dto.cpf;
+    }
+
     return await this.repository.save(student);
   }
 

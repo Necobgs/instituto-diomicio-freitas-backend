@@ -99,7 +99,7 @@ export class UserService {
     }
     if (dto.email) {
       const exists = await this.existsBy('email', dto.email)
-      if (exists) {
+      if (exists && user.email !== dto.email) {
         throw new BadRequestException('Usuário com o email já existe');
       }
       user.email = dto.email;
@@ -107,7 +107,7 @@ export class UserService {
 
     if (dto.cpf) {
       const exists = await this.existsBy('cpf', dto.cpf)
-      if (exists) {
+      if (exists && user.cpf !== dto.cpf) {
         throw new BadRequestException('Usuário com o cpf já existe');
       }
       user.cpf = dto.cpf;
