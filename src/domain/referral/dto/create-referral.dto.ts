@@ -4,21 +4,21 @@ export class CreateReferralDto {
 
     @IsPositive()
     @IsNotEmpty()
-    student_id: number;
+    studentId: number;
 
     @IsPositive()
     @IsNotEmpty()
-    enterprise_id: number;
+    enterpriseId: number;
 
     @IsPositive()
     @IsNotEmpty()
-    job_id: number;
+    jobId: number;
 
     @IsNotEmpty()
     @IsDateString()
-    admission_date: string;
+    admissionDate: string;
 
     @IsOptional()
     @IsDateString()
-    termination_date_ieedf?: string;
+    terminationDateIeedf?: string;
 }

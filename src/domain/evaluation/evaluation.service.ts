@@ -37,7 +37,6 @@ export class EvaluationService {
       relations: ['student', 'user'],
       select: {
         id: true,
-        entryDate: true,
         date: true,
         interviewNote: true,
         note: true,

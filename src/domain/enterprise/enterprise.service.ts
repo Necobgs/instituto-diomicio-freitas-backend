@@ -49,7 +49,7 @@ export class EnterpriseService {
 
     if (dto.cnpj) {
       const exists = await this.existsBy('cnpj', dto.cnpj)
-      if (exists) {
+      if (exists && enterprise.cnpj !== dto.cnpj) {
         throw new BadRequestException('Empresa com o cnpj já existe');
       }
     }

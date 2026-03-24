@@ -24,11 +24,4 @@ export class CreateStudentDto {
 	@Transform(({ value }) => value.trim())
 	@Length(11, 15)
 	cpf!: string;
-
-	@ApiPropertyOptional({ example: 1 })
-	@IsOptional()
-	@IsNumber()
-	@IsPositive()
-	@Type(() => Number)
-	enterpriseId?: number;
 }

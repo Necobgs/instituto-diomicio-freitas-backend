@@ -4,13 +4,12 @@ import { UpdateStudentDto } from './dto/update-student.dto';
 import { FilterDto } from '../shared/filter/filter-dto';
 import { StudentRepository } from './student.repository';
 import { Student } from './entities/student.entity';
-import { EnterpriseService } from '../enterprise/enterprise.service';
+
 
 @Injectable()
 export class StudentService {
   constructor(
-    private readonly repository: StudentRepository,
-    private readonly enterpriseService: EnterpriseService
+    private readonly repository: StudentRepository
   ) { }
 
   async create(dto: CreateStudentDto) {
@@ -19,10 +18,6 @@ export class StudentService {
 
     if (exists) {
       throw new BadRequestException('Estudante com o cpf já existe');
-    }
-
-    if (dto.enterpriseId) {
-      student.enterprise = await this.enterpriseService.findOneBy('id', dto.enterpriseId)
     }
 
     return await this.repository.save(student);
@@ -54,10 +49,6 @@ export class StudentService {
 
     if (!student) {
       throw new NotFoundException(`Aluno com id ${id} não encontrado`);
-    }
-
-    if (dto.enterpriseId) {
-      student.enterprise = await this.enterpriseService.findOneBy('id', dto.enterpriseId)
     }
 
     return await this.repository.save(student);
