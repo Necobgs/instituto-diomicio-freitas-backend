@@ -3,11 +3,15 @@ import { ReferralService } from './referral.service';
 import { CreateReferralDto } from './dto/create-referral.dto';
 import { UpdateReferralDto } from './dto/update-referral.dto';
 import { FilterDto } from '../shared/filter/filter-dto';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Referral')
+@ApiBearerAuth('access-token')
 @Controller('referral')
 export class ReferralController {
   constructor(private readonly referralService: ReferralService) { }
 
+  @ApiOperation({ summary: 'Criar encaminhamento' })
   @Post()
   create(@Body() createReferralDto: CreateReferralDto) {
     return this.referralService.create(createReferralDto);

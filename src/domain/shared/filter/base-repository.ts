@@ -13,6 +13,8 @@ export interface ResponseFilterMany<T extends ObjectLiteral> {
   count: number;
   limit: number;
   page: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
 }
 
 export abstract class BaseRepository<
@@ -44,11 +46,20 @@ export abstract class BaseRepository<
 
   async returnFilterAll(filter: FilterDto, qb: SelectQueryBuilder<T>) {
     const [items, count] = await qb.getManyAndCount();
+    const hasNextPage = items.length > filter.limit;
+    const hasPreviousPage = filter.page > 1;
+
+    if (hasNextPage) {
+      items.pop();
+    }
+
     return {
       items: items,
       count: count,
-      limit: filter!.limit,
-      page: filter!.page
+      limit: filter.limit,
+      page: filter.page,
+      hasNextPage: hasNextPage,
+      hasPreviousPage: hasPreviousPage
     };
   }
 
@@ -75,7 +86,7 @@ export abstract class BaseRepository<
       }
     }
     if (withPagination) {
-      qb = qb.take(limit).skip(skip)
+      qb = qb.take(limit + 1).skip(skip)
     }
     return qb;
   }

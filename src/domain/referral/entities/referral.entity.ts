@@ -13,15 +13,15 @@ import { Job } from '../../job/entities/job.entity';
 export class Referral extends AggregateRoot {
 
     @JoinColumn({ name: 'student_id' })
-    @ManyToOne(() => Student, { cascade: true })
+    @ManyToOne(() => Student, { cascade: ['soft-remove', 'recover', 'update'] })
     student: Student;
 
     @JoinColumn({ name: 'enterprise_id' })
-    @ManyToOne(() => Enterprise)
+    @ManyToOne(() => Enterprise, { cascade: ['soft-remove', 'recover', 'update'] })
     enterprise: Enterprise;
 
     @JoinColumn({ name: 'job_id' })
-    @ManyToOne(() => Job)
+    @ManyToOne(() => Job, { cascade: ['soft-remove', 'recover', 'update'] })
     job: Job;
 
     @Column({ name: 'admission_date', type: 'date', nullable: true })

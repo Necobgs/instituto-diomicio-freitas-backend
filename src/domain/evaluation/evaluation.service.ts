@@ -33,7 +33,7 @@ export class EvaluationService {
   }
 
   async findAll(dto: FilterDto) {
-    return await this.repository.getFilteredQueryBuilder(dto).setFindOptions({
+    const qb = this.repository.getFilteredQueryBuilder(dto).setFindOptions({
       relations: ['student', 'user'],
       select: {
         id: true,
@@ -50,7 +50,8 @@ export class EvaluationService {
           username: true
         }
       }
-    }).getMany();
+    });
+    return await this.repository.returnFilterAll(dto, qb);
   }
 
   async findOneById(id: number) {
