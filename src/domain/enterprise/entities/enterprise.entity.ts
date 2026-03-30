@@ -18,7 +18,4 @@ export class Enterprise extends AggregateRoot {
     @OneToMany(() => Student, student => student.enterprise)
     students?: Student[];
 
-    @OneToMany(() => Monitoring, m => m.enterprise)
-    monitorings?: Monitoring[];
-
 }

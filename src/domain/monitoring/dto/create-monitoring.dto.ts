@@ -16,9 +16,4 @@ export class CreateMonitoringDto {
 	@IsNumber()
 	@Type(() => Number)
 	studentId!: number;
-
-	@ApiProperty({ example: 2 })
-	@IsNumber()
-	@Type(() => Number)
-	enterpriseId!: number;
 }

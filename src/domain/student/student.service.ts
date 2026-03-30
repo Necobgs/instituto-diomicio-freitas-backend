@@ -28,7 +28,10 @@ export class StudentService {
   }
 
   async findOneBy<T extends keyof Student>(key: T, value: Student[T]) {
-    const student = await this.repository.findOneBy({ [key]: value });
+    const student = await this.repository.findOne({
+      where: { [key]: value },
+      relations: ['enterprise', 'job']
+    });
     if (!student) {
       throw new NotFoundException(`Aluno com ${key} ${value} não encontrado`);
     }

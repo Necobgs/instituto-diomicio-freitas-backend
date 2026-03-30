@@ -8,6 +8,7 @@ import { Student } from '../student/entities/student.entity';
 import { Job } from '../job/entities/job.entity';
 import { Enterprise } from '../enterprise/entities/enterprise.entity';
 import { Not } from 'typeorm';
+import { dot } from 'node:test/reporters';
 
 @Injectable()
 export class ReferralService {
@@ -55,7 +56,7 @@ export class ReferralService {
       referral.admissionDate = createReferralDto.admissionDate;
       referral.terminationDateIeedf = createReferralDto.terminationDateIeedf;
       const savedReferral = await manager.save(Referral, referral);
-      await manager.update(Student, { id: student.id }, { enterprise: enterprise });
+      await manager.update(Student, { id: student.id }, { enterprise, job });
       return savedReferral;
     })
   }
@@ -97,47 +98,60 @@ export class ReferralService {
   }
 
   async update(id: number, updateReferralDto: UpdateReferralDto) {
-    const referral = await this.findOneBy('id', id);
+    return await this.repository.manager.transaction(async (manager) => {
 
-    if (updateReferralDto.studentId) {
-      const student = await this.repository.manager.findOneBy(Student, { id: updateReferralDto.studentId });
-      if (!student) {
-        throw new NotFoundException(`Aluno com id ${updateReferralDto.studentId} não encontrado`);
+      const referral = await this.repository.findOne({
+        where: { id },
+        relations: ['student', 'enterprise', 'job']
+      });
+
+      if (!referral) {
+        throw new NotFoundException(`Encaminhamento com id ${id} não encontrado`);
       }
-      referral.student = student;
-    }
 
-    if (updateReferralDto.enterpriseId) {
-      const enterprise = await this.repository.manager.findOneBy(Enterprise, { id: updateReferralDto.enterpriseId });
-      if (!enterprise) {
-        throw new NotFoundException(`Empresa com id ${updateReferralDto.enterpriseId} não encontrada`);
+      if (updateReferralDto.studentId && updateReferralDto.studentId !== referral.student.id) {
+        const student = await this.repository.manager.findOneBy(Student, { id: updateReferralDto.studentId });
+        if (!student) {
+          throw new NotFoundException(`Aluno com id ${updateReferralDto.studentId} não encontrado`);
+        }
+        referral.student = student;
       }
-      referral.enterprise = enterprise;
-    }
 
-    if (updateReferralDto.jobId) {
-      const job = await this.repository.manager.findOneBy(Job, { id: updateReferralDto.jobId });
-      if (!job) {
-        throw new NotFoundException(`Cargo com id ${updateReferralDto.jobId} não encontrada`);
+      if (updateReferralDto.enterpriseId && updateReferralDto.enterpriseId !== referral.enterprise.id) {
+        const enterprise = await this.repository.manager.findOneBy(Enterprise, { id: updateReferralDto.enterpriseId });
+        if (!enterprise) {
+          throw new NotFoundException(`Empresa com id ${updateReferralDto.enterpriseId} não encontrada`);
+        }
+        referral.enterprise = enterprise;
+        referral.student.enterprise = enterprise;
       }
-      referral.job = job;
-    }
 
-    const exists = await this.repository.exists({
-      where: {
-        student: { id: Not(id) },
-        enterprise: { id: referral.enterprise.id },
-        job: { id: referral.job.id }
+      if (updateReferralDto.jobId && updateReferralDto.jobId !== referral.job.id) {
+        const job = await this.repository.manager.findOneBy(Job, { id: updateReferralDto.jobId });
+        if (!job) {
+          throw new NotFoundException(`Cargo com id ${updateReferralDto.jobId} não encontrada`);
+        }
+        referral.job = job;
+        referral.student.job = job;
       }
-    });
 
-    if (exists) {
-      throw new BadRequestException(`Encaminhamento para o aluno ${referral.student.name} na empresa ${referral.enterprise.name} na vaga ${referral.job.name} já existe`);
-    }
+      const exists = await this.repository.exists({
+        where: {
+          id: Not(id),
+          student: { id: referral.student.id },
+          enterprise: { id: referral.enterprise.id },
+          job: { id: referral.job.id }
+        }
+      });
 
-    referral.admissionDate = updateReferralDto.admissionDate;
-    referral.terminationDateIeedf = updateReferralDto.terminationDateIeedf;
-    return await this.repository.save(referral);
+      if (exists) {
+        throw new BadRequestException(`Encaminhamento para o aluno ${referral.student.name} na empresa ${referral.enterprise.name} na vaga ${referral.job.name} já existe`);
+      }
+
+      referral.admissionDate = updateReferralDto.admissionDate;
+      referral.terminationDateIeedf = updateReferralDto.terminationDateIeedf;
+      return await this.repository.save(referral);
+    })
   }
 
   async remove(id: number) {

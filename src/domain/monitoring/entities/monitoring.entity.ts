@@ -1,7 +1,6 @@
 import { Entity, Column, ManyToOne } from "typeorm";
 import { AggregateRoot } from "../../shared/aggregate-root";
 import { Student } from "../../student/entities/student.entity";
-import { Enterprise } from "../../enterprise/entities/enterprise.entity";
 
 @Entity({ name: 'monitorings' })
 export class Monitoring extends AggregateRoot {
@@ -14,7 +13,4 @@ export class Monitoring extends AggregateRoot {
 
     @ManyToOne(() => Student, student => student.monitorings)
     student!: Student;
-
-    @ManyToOne(() => Enterprise, enterprise => enterprise.monitorings)
-    enterprise!: Enterprise;
 }
