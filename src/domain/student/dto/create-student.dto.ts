@@ -19,7 +19,7 @@ export class CreateStudentDto {
 	@IsDate()
 	@MaxDate(new Date())
 	@IsNotEmpty()
-	date_birthday!: Date;
+	dateBirthday!: Date;
 
 	@ApiProperty({ example: '12345678901' })
 	@IsNotEmpty()
