@@ -262,15 +262,15 @@ export class CreateEvaluationDto {
 	q46: string;
 
 	@IsString()
-	@IsOptional()
+	@IsNotEmpty()
 	q47: string;
 
 	@IsString()
-	@IsOptional()
+	@IsNotEmpty()
 	q48: string;
 
 	@IsString()
-	@IsOptional()
+	@IsNotEmpty()
 	q49: string;
 
 }

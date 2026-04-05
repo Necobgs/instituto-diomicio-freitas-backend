@@ -11,8 +11,8 @@ export class Student extends AggregateRoot {
     @Column()
     name!: string;
 
-    @Column()
-    phone!: string;
+    @Column({ nullable: true })
+    phone?: string;
 
     @Column({ name: 'responsible_name', nullable: true })
     responsibleName?: string;
