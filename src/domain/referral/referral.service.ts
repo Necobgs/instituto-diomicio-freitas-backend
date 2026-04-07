@@ -19,19 +19,19 @@ export class ReferralService {
 
   async create(createReferralDto: CreateReferralDto) {
     return await this.repository.manager.transaction(async (manager) => {
-      const student = await manager.findOne(Student, { where: { id: createReferralDto.studentId }, withDeleted: true });
+      const student = await manager.findOneBy(Student, { id: createReferralDto.studentId });
 
       if (!student) {
         throw new NotFoundException(`Aluno com id ${createReferralDto.studentId} não encontrado`);
       }
 
-      const enterprise = await manager.findOne(Enterprise, { where: { id: createReferralDto.enterpriseId }, withDeleted: true });
+      const enterprise = await manager.findOneBy(Enterprise, { id: createReferralDto.enterpriseId });
 
       if (!enterprise) {
         throw new NotFoundException(`Empresa com id ${createReferralDto.enterpriseId} não encontrada`);
       }
 
-      const job = await manager.findOne(Job, { where: { id: createReferralDto.jobId }, withDeleted: true });
+      const job = await manager.findOneBy(Job, { id: createReferralDto.jobId });
 
       if (!job) {
         throw new NotFoundException(`Vaga com id ${createReferralDto.jobId} não encontrada`);
@@ -102,8 +102,7 @@ export class ReferralService {
 
       const referral = await this.repository.findOne({
         where: { id },
-        relations: ['student', 'enterprise', 'job'],
-        withDeleted: true
+        relations: ['student', 'enterprise', 'job']
       });
 
       if (!referral) {
@@ -111,7 +110,7 @@ export class ReferralService {
       }
 
       if (updateReferralDto.studentId && updateReferralDto.studentId !== referral.student.id) {
-        const student = await this.repository.manager.findOne(Student, { where: { id: updateReferralDto.studentId }, withDeleted: true });
+        const student = await this.repository.manager.findOneBy(Student, { id: updateReferralDto.studentId });
         if (!student) {
           throw new NotFoundException(`Aluno com id ${updateReferralDto.studentId} não encontrado`);
         }
@@ -119,7 +118,7 @@ export class ReferralService {
       }
 
       if (updateReferralDto.enterpriseId && updateReferralDto.enterpriseId !== referral.enterprise.id) {
-        const enterprise = await this.repository.manager.findOne(Enterprise, { where: { id: updateReferralDto.enterpriseId }, withDeleted: true });
+        const enterprise = await this.repository.manager.findOneBy(Enterprise, { id: updateReferralDto.enterpriseId });
         if (!enterprise) {
           throw new NotFoundException(`Empresa com id ${updateReferralDto.enterpriseId} não encontrada`);
         }
@@ -128,7 +127,7 @@ export class ReferralService {
       }
 
       if (updateReferralDto.jobId && updateReferralDto.jobId !== referral.job.id) {
-        const job = await this.repository.manager.findOne(Job, { where: { id: updateReferralDto.jobId }, withDeleted: true });
+        const job = await this.repository.manager.findOneBy(Job, { id: updateReferralDto.jobId });
         if (!job) {
           throw new NotFoundException(`Cargo com id ${updateReferralDto.jobId} não encontrada`);
         }
@@ -160,8 +159,7 @@ export class ReferralService {
       where: { id },
       select: {
         id: true
-      },
-      withDeleted: true
+      }
     });
     if (!referral) {
       throw new NotFoundException(`Encaminhamento com id ${id} não encontrado`);

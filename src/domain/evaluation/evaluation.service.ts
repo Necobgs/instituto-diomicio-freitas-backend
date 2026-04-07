@@ -14,13 +14,13 @@ export class EvaluationService {
   ) { }
 
   async create(dto: CreateEvaluationDto) {
-    const student = await this.repository.manager.findOne(Student, { where: { id: dto.studentId }, withDeleted: true })
+    const student = await this.repository.manager.findOneBy(Student, { id: dto.studentId })
 
     if (!student) {
       throw new NotFoundException(`Aluno com id ${dto.studentId} não encontrado`);
     }
 
-    const user = await this.repository.manager.findOne(User, { where: { id: dto.userId }, withDeleted: true })
+    const user = await this.repository.manager.findOneBy(User, { id: dto.userId })
 
     if (!user) {
       throw new NotFoundException(`Usuário com id ${dto.userId} não encontrado`);

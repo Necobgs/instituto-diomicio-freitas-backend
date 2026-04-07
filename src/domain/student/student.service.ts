@@ -70,7 +70,6 @@ export class StudentService {
     const student = await this.repository.findOne({
       where: { id },
       relations: ['evaluations', 'monitorings'],
-      withDeleted: true
     });
 
     if (!student) {

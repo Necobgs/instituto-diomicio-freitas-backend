@@ -60,9 +60,11 @@ export class UserService {
   }
 
   async findOneBy<T extends keyof User>(key: T, value: User[T]): Promise<UserWithoutPassDto> {
-    const user = await this.repository.findOne({ where: {
-      [key]: value
-    }, withDeleted: true });
+    const user = await this.repository.findOne({
+      where: {
+        [key]: value
+      }, withDeleted: true
+    });
     if (!user) {
       throw new NotFoundException(`Usuário com ${key} ${value} não encontrado`);
     }
@@ -80,7 +82,6 @@ export class UserService {
         email: true,
         password: true
       },
-      withDeleted: true
     });
   }
 
@@ -141,8 +142,7 @@ export class UserService {
         tokenPasswordChangeExpiresAt: true,
         password: true,
         mustChangePassword: true
-      },
-      withDeleted: true
+      }
     });
 
     if (!user || (user.tokenPasswordChangeExpiresAt && user.tokenPasswordChangeExpiresAt < new Date())) {
@@ -163,9 +163,9 @@ export class UserService {
   @OnEvent('password.change.request')
   async sendPasswordChangeEmail(dto: PasswordChangeRequestDto) {
     try {
-      const user = await this.repository.findOne({ where: {
+      const user = await this.repository.findOneBy({
         email: dto.email,
-      }, withDeleted: true });
+      });
 
       if (!user) {
         return;
