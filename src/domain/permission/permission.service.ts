@@ -22,6 +22,7 @@ export class PermissionService {
 
   async findOne(id: number) {
     const permission = await this.permissionRepository.createQueryBuilder('entity')
+      .withDeleted()
       .leftJoin('entity.resource', 'resource')
       .leftJoin('entity.action', 'action')
       .select(['entity.id', 'resource.name', 'action.name'])

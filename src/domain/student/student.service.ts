@@ -30,7 +30,8 @@ export class StudentService {
   async findOneBy<T extends keyof Student>(key: T, value: Student[T]) {
     const student = await this.repository.findOne({
       where: { [key]: value },
-      relations: ['enterprise', 'job']
+      relations: ['enterprise', 'job'],
+      withDeleted: true
     });
     if (!student) {
       throw new NotFoundException(`Aluno com ${key} ${value} não encontrado`);
@@ -69,6 +70,7 @@ export class StudentService {
     const student = await this.repository.findOne({
       where: { id },
       relations: ['evaluations', 'monitorings'],
+      withDeleted: true
     });
 
     if (!student) {

@@ -39,7 +39,7 @@ export class MonitoringService {
   }
 
   async findOneBy<T extends keyof Monitoring>(key: T, value: Monitoring[T]) {
-    const item = await this.repository.findOne({ where: { [key]: value }, relations: ['student', 'student.enterprise'] });
+    const item = await this.repository.findOne({ where: { [key]: value }, relations: ['student', 'student.enterprise'], withDeleted: true });
     if (!item) throw new NotFoundException(`Monitoramento com ${key} ${value} não encontrado`);
     return item;
   }

@@ -16,7 +16,7 @@ export class ResourceService {
   }
 
   async findOneBy<T extends keyof Resource>(key: T, value: Resource[T]) {
-    const resource = await this.repository.findOneBy({ [key]: value });
+    const resource = await this.repository.findOne({ where: { [key]: value }, withDeleted: true });
     if (!resource) {
       throw new NotFoundException(`Resource com ${key} ${value} não encontrado`);
     }

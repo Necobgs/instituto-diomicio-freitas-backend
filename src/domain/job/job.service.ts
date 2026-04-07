@@ -25,7 +25,7 @@ export class JobService {
     }
 
     async findOneBy<T extends keyof Job>(key: T, value: Job[T]) {
-        const job = await this.repository.findOne({ where: { [key]: value } });
+        const job = await this.repository.findOne({ where: { [key]: value }, withDeleted: true });
         if (!job) {
             throw new NotFoundException(`Função com ${key} com valor ${value} não encontrado`);
         }

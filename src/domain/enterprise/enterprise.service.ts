@@ -27,7 +27,7 @@ export class EnterpriseService {
   }
 
   async findOneBy<T extends keyof Enterprise>(key: T, value: Enterprise[T]) {
-    const item = await this.repository.findOneBy({ [key]: value });
+    const item = await this.repository.findOne({ where: { [key]: value }, withDeleted: true });
     if (!item) throw new NotFoundException(`Empresa com ${key} ${value} não encontrada`);
     return item;
   }

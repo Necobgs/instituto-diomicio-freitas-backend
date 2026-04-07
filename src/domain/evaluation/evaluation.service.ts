@@ -14,13 +14,13 @@ export class EvaluationService {
   ) { }
 
   async create(dto: CreateEvaluationDto) {
-    const student = await this.repository.manager.findOneBy(Student, { id: dto.studentId })
+    const student = await this.repository.manager.findOne(Student, { where: { id: dto.studentId }, withDeleted: true })
 
     if (!student) {
       throw new NotFoundException(`Aluno com id ${dto.studentId} não encontrado`);
     }
 
-    const user = await this.repository.manager.findOneBy(User, { id: dto.userId })
+    const user = await this.repository.manager.findOne(User, { where: { id: dto.userId }, withDeleted: true })
 
     if (!user) {
       throw new NotFoundException(`Usuário com id ${dto.userId} não encontrado`);
@@ -60,11 +60,12 @@ export class EvaluationService {
         id
       },
       relations: ['student', 'user'],
+      withDeleted: true
     });
   }
 
   async findOneBy<T extends keyof Evaluation>(key: T, value: Evaluation[T]) {
-    const item = await this.repository.findOneBy({ [key]: value });
+    const item = await this.repository.findOne({ where: { [key]: value }, withDeleted: true });
     if (!item) {
       throw new NotFoundException(`Avaliação com ${key} ${value} não encontrada`);
     }

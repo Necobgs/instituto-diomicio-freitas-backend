@@ -16,7 +16,7 @@ export class ActionService {
   }
 
   async findOneBy<T extends keyof Action>(key: T, value: Action[T]) {
-    const action = await this.repository.findOneBy({ [key]: value });
+    const action = await this.repository.findOne({ where: { [key]: value }, withDeleted: true });
     if (!action) {
       throw new NotFoundException(`Action com ${key} ${value} não encontrado`);
     }
