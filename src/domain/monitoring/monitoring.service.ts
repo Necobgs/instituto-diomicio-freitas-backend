@@ -27,6 +27,7 @@ export class MonitoringService {
       relations: ['student'],
       select: {
         id: true,
+        deleted_at: true,
         observations: true,
         visitDate: true,
         student: {

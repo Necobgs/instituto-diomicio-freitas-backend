@@ -23,24 +23,28 @@ export class StudentController {
 
   @ApiOperation({ summary: 'List all students' })
   @Get()
+  @Authorization({ resource: Resources.student, actions: [Actions.read] })
   findAll(@Query() dto: FilterDto) {
     return this.studentService.findAll(dto);
   }
 
   @ApiOperation({ summary: 'Get student by ID' })
   @Get(':id')
+  @Authorization({ resource: Resources.student, actions: [Actions.read] })
   findOne(@Param('id') id: string) {
     return this.studentService.findOneBy('id', +id);
   }
 
   @ApiOperation({ summary: 'Update student by ID' })
   @Patch(':id')
+  @Authorization({ resource: Resources.student, actions: [Actions.update] })
   update(@Param('id') id: string, @Body() updateStudentDto: UpdateStudentDto) {
     return this.studentService.update(+id, updateStudentDto);
   }
 
   @ApiOperation({ summary: 'Delete student by ID' })
   @Delete(':id')
+  @Authorization({ resource: Resources.student, actions: [Actions.delete] })
   remove(@Param('id') id: string) {
     return this.studentService.remove(+id);
   }

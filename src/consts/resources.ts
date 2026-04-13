@@ -4,4 +4,9 @@ export const Resources = {
     users: 'users',
     student: 'student',
     permissions: 'permissions',
+    referral: 'referral',
+    job: 'job',
+    action: 'action',
+    evaluation: 'evaluation',
+    resource: 'resource',
 }

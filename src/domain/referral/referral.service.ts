@@ -66,6 +66,7 @@ export class ReferralService {
       relations: ['student', 'enterprise', 'job'],
       select: {
         id: true,
+        deleted_at: true,
         student: {
           id: true,
           name: true,
