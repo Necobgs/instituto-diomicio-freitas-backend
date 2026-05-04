@@ -45,6 +45,7 @@ export abstract class BaseRepository<
   }
 
   async returnFilterAll(filter: FilterDto, qb: SelectQueryBuilder<T>) {
+    console.log(qb.getQueryAndParameters())
     const [items, count] = await qb.getManyAndCount();
     const hasNextPage = items.length > filter.limit;
     const hasPreviousPage = filter.page > 1;

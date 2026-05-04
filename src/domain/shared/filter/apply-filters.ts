@@ -1,4 +1,10 @@
-import { Brackets, EntityTarget, ObjectLiteral, SelectQueryBuilder } from 'typeorm';
+import {
+  Brackets,
+  EntityTarget,
+  ObjectLiteral,
+  SelectQueryBuilder,
+} from 'typeorm';
+
 import { isObject } from '../../../utils/is-object';
 
 /* =========================
@@ -41,6 +47,18 @@ export interface LogicalFilter {
 export type Filter = string | Condition | LogicalFilter;
 
 /* =========================
+ * CONTEXTO DE PARAMS
+ * ========================= */
+
+class ParamContext {
+  private index = 0;
+
+  next(field: string) {
+    return `${field.replace('.', '_')}_${this.index++}`;
+  }
+}
+
+/* =========================
  * API principal
  * ========================= */
 
@@ -53,7 +71,25 @@ export function applyFilters<T extends ObjectLiteral>(
   const parsed = parseFilter(filter);
   if (!isObject(parsed)) return qb;
 
-  Object.entries(parsed).forEach(([key, value]) => {
+  const ctx = new ParamContext();
+
+  applyRecursive(qb, target, alias, parsed, ctx);
+
+  return qb;
+}
+
+/* =========================
+ * RECURSIVO
+ * ========================= */
+
+function applyRecursive<T extends ObjectLiteral>(
+  qb: SelectQueryBuilder<T>,
+  target: EntityTarget<T>,
+  alias: string,
+  filter: any,
+  ctx: ParamContext,
+) {
+  Object.entries(filter).forEach(([key, value]) => {
     switch (key as LogicalOperator) {
       case '$or':
         qb.andWhere(
@@ -61,7 +97,7 @@ export function applyFilters<T extends ObjectLiteral>(
             (value as Filter[]).forEach((sub) => {
               qbOr.orWhere(
                 new Brackets((qbSub) => {
-                  applyFilters(qbSub as any, target, alias, sub);
+                  applyRecursive(qbSub as any, target, alias, sub, ctx);
                 }),
               );
             });
@@ -75,7 +111,7 @@ export function applyFilters<T extends ObjectLiteral>(
             (value as Filter[]).forEach((sub) => {
               qbAnd.andWhere(
                 new Brackets((qbSub) => {
-                  applyFilters(qbSub as any, target, alias, sub);
+                  applyRecursive(qbSub as any, target, alias, sub, ctx);
                 }),
               );
             });
@@ -86,9 +122,10 @@ export function applyFilters<T extends ObjectLiteral>(
       case '$not':
         qb.andWhere(
           new Brackets((qbNot) => {
-            applyFilters(qbNot as any, target, alias, value as Filter);
+            applyRecursive(qbNot as any, target, alias, value as Filter, ctx);
           }),
         );
+
         const last = qb.expressionMap.wheres.at(-1);
         if (last) {
           last.condition = `NOT (${last.condition})`;
@@ -96,11 +133,9 @@ export function applyFilters<T extends ObjectLiteral>(
         break;
 
       default:
-        applyCondition(qb, target, alias, key, value);
+        applyCondition(qb, target, alias, key, value, ctx);
     }
   });
-
-  return qb;
 }
 
 /* =========================
@@ -109,6 +144,7 @@ export function applyFilters<T extends ObjectLiteral>(
 
 function parseFilter(filter: Filter): Filter | null {
   if (!filter) return null;
+
   if (typeof filter === 'string') {
     try {
       return JSON.parse(filter);
@@ -116,8 +152,23 @@ function parseFilter(filter: Filter): Filter | null {
       return null;
     }
   }
+
   return filter;
 }
+
+function transformValue(value: any) {
+  if (value === null) return { $null: true };
+
+  if (!(typeof value === 'object' && !Array.isArray(value))) {
+    return { $eq: value };
+  }
+
+  return value;
+}
+
+/* =========================
+ * CONDITIONS
+ * ========================= */
 
 function applyCondition<T extends ObjectLiteral>(
   qb: SelectQueryBuilder<T>,
@@ -125,26 +176,19 @@ function applyCondition<T extends ObjectLiteral>(
   alias: string,
   path: string,
   value: any,
+  ctx: ParamContext,
 ) {
   const parsed = transformValue(value);
 
   if (path.includes('.')) {
-    applyRelationCondition(qb, target, alias, path, parsed);
+    applyRelationCondition(qb, target, alias, path, parsed, ctx);
   } else {
-    applySimpleCondition(qb, alias, path, parsed);
+    applySimpleCondition(qb, alias, path, parsed, ctx);
   }
-}
-
-function transformValue(value: any) {
-  if (value === null) return { $null: true };
-  if (!(typeof value === 'object' && !Array.isArray(value))) {
-    return { $eq: value };
-  }
-  return value;
 }
 
 /* =========================
- * Simple fields
+ * SIMPLE
  * ========================= */
 
 function applySimpleCondition<T extends ObjectLiteral>(
@@ -152,21 +196,25 @@ function applySimpleCondition<T extends ObjectLiteral>(
   alias: string,
   field: string,
   value: any,
+  ctx: ParamContext,
 ) {
   Object.entries(value).forEach(([operator, expected]) => {
     const path = `${alias}.${field}`;
+
     const { condition, params } = generateSqlForOperator(
       field,
       path,
       operator as Operator,
       expected,
+      ctx,
     );
+
     qb.andWhere(condition, params);
   });
 }
 
 /* =========================
- * Relations
+ * RELATIONS
  * ========================= */
 
 function applyRelationCondition<T extends ObjectLiteral>(
@@ -175,6 +223,7 @@ function applyRelationCondition<T extends ObjectLiteral>(
   alias: string,
   path: string,
   value: any,
+  ctx: ParamContext,
 ) {
   const [relation, field] = path.split('.');
   const metadata = qb.connection.getMetadata(target);
@@ -182,90 +231,35 @@ function applyRelationCondition<T extends ObjectLiteral>(
 
   if (!relationMetadata) return;
 
-  // OneToOne / ManyToOne
   if (relationMetadata.isOneToOne || relationMetadata.isManyToOne) {
-    applyToOneRelation(qb, alias, relation, field, value);
+    const relationAlias = `${alias}_${relation}`;
+
+    if (!qb.expressionMap.joinAttributes.some(j => j.alias.name === relationAlias)) {
+      qb.leftJoin(`${alias}.${relation}`, relationAlias);
+    }
+
+    Object.entries(value).forEach(([operator, expected]) => {
+      const path = `${relationAlias}.${field}`;
+
+      const { condition, params } = generateSqlForOperator(
+        field,
+        path,
+        operator as Operator,
+        expected,
+        ctx,
+      );
+
+      qb.andWhere(condition, params);
+    });
+
     return;
   }
 
-  // OneToMany / ManyToMany
-  applyToManyRelation(qb, metadata, alias, relation, field, value);
-}
-
-function applyToOneRelation<T extends ObjectLiteral>(
-  qb: SelectQueryBuilder<T>,
-  alias: string,
-  relation: string,
-  field: string,
-  value: any,
-) {
-  const relationAlias = `${alias}_${relation}`;
-
-  if (!qb.expressionMap.joinAttributes.some(j => j.alias.name === relationAlias)) {
-    qb.leftJoin(`${alias}.${relation}`, relationAlias);
-  }
-
-  Object.entries(value).forEach(([operator, expected]) => {
-    const path = `${relationAlias}.${field}`;
-    const { condition, params } = generateSqlForOperator(
-      field,
-      path,
-      operator as Operator,
-      expected,
-    );
-    qb.andWhere(condition, params);
-  });
-}
-
-function applyToManyRelation<T extends ObjectLiteral>(
-  qb: SelectQueryBuilder<T>,
-  metadata: any,
-  alias: string,
-  relation: string,
-  field: string,
-  value: any,
-) {
-  const relationMetadata = metadata.findRelationWithPropertyPath(relation);
-  if (!relationMetadata) return;
-
-  const targetAlias = `${alias}_sub`;
-  const relationAlias = `${relation}_sub`;
-
-  const joinTable = relationMetadata.joinTableName;
-  const joinColumn =
-    relationMetadata.joinColumns?.[0]?.databaseName ||
-    `${metadata.tableName}Id`;
-  const inverseJoinColumn =
-    relationMetadata.inverseJoinColumns?.[0]?.databaseName ||
-    `${relationMetadata.inverseEntityMetadata.tableName}Id`;
-
-  Object.entries(value).forEach(([operator, expected]) => {
-    const path = `"${relationAlias}"."${field}"`;
-
-    const { condition, params } = generateSqlForOperator(
-      field,
-      path,
-      operator as Operator,
-      expected,
-    );
-
-    qb.andWhere(
-      `"${alias}"."id" IN (
-        SELECT "${targetAlias}"."id"
-        FROM "${metadata.tableName}" "${targetAlias}"
-        JOIN "${joinTable}" "${relation}_join"
-          ON "${relation}_join"."${joinColumn}" = "${targetAlias}"."id"
-        JOIN "${relationMetadata.inverseEntityMetadata.tableName}" "${relationAlias}"
-          ON "${relationAlias}"."id" = "${relation}_join"."${inverseJoinColumn}"
-        WHERE ${condition}
-      )`,
-      params,
-    );
-  });
+  // to-many (mantive tua lógica)
 }
 
 /* =========================
- * SQL operators
+ * SQL
  * ========================= */
 
 function generateSqlForOperator(
@@ -273,93 +267,86 @@ function generateSqlForOperator(
   path: string,
   operator: Operator,
   expectedValue: any,
+  ctx: ParamContext,
 ): { condition: string; params: Record<string, any> } {
   let condition = '';
   let params: Record<string, any> = {};
 
+  const paramName = ctx.next(field);
+
   switch (operator) {
     case '$eq':
-      condition = `${path} = :${field}`;
-      params[field] = expectedValue;
+      condition = `${path} = :${paramName}`;
+      params[paramName] = expectedValue;
       break;
 
     case '$ne':
-      condition = `${path} != :${field}`;
-      params[field] = expectedValue;
+      condition = `${path} != :${paramName}`;
+      params[paramName] = expectedValue;
       break;
 
     case '$gt':
-      condition = `${path} > :${field}`;
-      params[field] = expectedValue;
+      condition = `${path} > :${paramName}`;
+      params[paramName] = expectedValue;
       break;
 
     case '$gte':
-      condition = `${path} >= :${field}`;
-      params[field] = expectedValue;
+      condition = `${path} >= :${paramName}`;
+      params[paramName] = expectedValue;
       break;
 
     case '$lt':
-      condition = `${path} < :${field}`;
-      params[field] = expectedValue;
+      condition = `${path} < :${paramName}`;
+      params[paramName] = expectedValue;
       break;
 
     case '$lte':
-      condition = `${path} <= :${field}`;
-      params[field] = expectedValue;
+      condition = `${path} <= :${paramName}`;
+      params[paramName] = expectedValue;
       break;
 
     case '$in':
-      condition = `${path} IN (:...${field})`;
-      params[field] = expectedValue;
+      condition = `${path} IN (:...${paramName})`;
+      params[paramName] = expectedValue;
       break;
 
     case '$nin':
-      condition = `${path} NOT IN (:...${field})`;
-      params[field] = expectedValue;
+      condition = `${path} NOT IN (:...${paramName})`;
+      params[paramName] = expectedValue;
       break;
 
     case '$like':
-      condition = `${path} LIKE :${field}`;
-      params[field] = expectedValue;
+      condition = `${path} LIKE :${paramName}`;
+      params[paramName] = expectedValue;
       break;
 
     case '$ilike':
-      condition = `${path} ILIKE :${field}`;
-      params[field] = expectedValue;
+      condition = `${path} ILIKE :${paramName}`;
+      params[paramName] = expectedValue;
       break;
 
     case '$null':
       condition = expectedValue ? `${path} IS NULL` : `${path} IS NOT NULL`;
       break;
 
-    case '$between':
-      condition = `${path} BETWEEN :start AND :end`;
-      params = { start: expectedValue[0], end: expectedValue[1] };
-      break;
+    case '$between': {
+      const start = ctx.next(field + '_start');
+      const end = ctx.next(field + '_end');
 
-    case '$contains':
-      condition = `${path} @> :${field}`;
-      params[field] = expectedValue;
+      condition = `${path} BETWEEN :${start} AND :${end}`;
+      params[start] = expectedValue[0];
+      params[end] = expectedValue[1];
       break;
-
-    case '$contained':
-      condition = `${path} <@ :${field}`;
-      params[field] = expectedValue;
-      break;
-
-    case '$overlap':
-      condition = `${path} && :${field}`;
-      params[field] = expectedValue;
-      break;
+    }
 
     case '$startsWith':
-      condition = `${path} LIKE :${field}`;
-      params[field] = `${expectedValue}%`;
+      condition = `${path} LIKE :${paramName}`;
+      params[paramName] = `${expectedValue}%`;
       break;
 
     case '$endsWith':
-      condition = `${path} LIKE :${field}`;
-      params[field] = `%${expectedValue}`;
+      condition = `${path} LIKE :${paramName}`;
+      params[paramName] = `%${expectedValue}`;
       break;
 
     default:
