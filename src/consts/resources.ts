@@ -1,9 +1,9 @@
 export const Resources = {
     enterprise: 'enterprise',
     monitoring: 'monitoring',
-    users: 'users',
+    user: 'user',
     student: 'student',
-    permissions: 'permissions',
+    permission: 'permission',
     referral: 'referral',
     job: 'job',
     action: 'action',

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateMonitoringDto } from './dto/create-monitoring.dto';
 import { UpdateMonitoringDto } from './dto/update-monitoring.dto';
 import { FilterDto } from '../shared/filter/filter-dto';
@@ -71,5 +71,21 @@ export class MonitoringService {
   async remove(id: number) {
     const item = await this.findOneBy('id', id);
     return await this.repository.softRemove(item);
+  }
+
+  async restore(id: number) {
+    const item = await this.repository.findOne({ where: { id }, withDeleted: true, select: { id: true, deleted_at: true } });
+    if (!item) {
+      throw new NotFoundException('Monitoramento não encontrado');
+    }
+    if (!item.deleted_at) {
+      throw new BadRequestException('Monitoramento não está desativado');
+    }
+    await this.repository.restore(id);
+    const restored = await this.repository.findOne({
+      where: { id },
+      select: { id: true, created_at: true, updated_at: true, deleted_at: true }
+    });
+    return restored;
   }
 }

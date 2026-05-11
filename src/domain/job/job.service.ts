@@ -53,6 +53,22 @@ export class JobService {
         return await this.repository.softRemove(job);
     }
 
+    async restore(id: number) {
+        const job = await this.repository.findOne({ where: { id }, withDeleted: true, select: { id: true, deleted_at: true } });
+        if (!job) {
+            throw new NotFoundException('Vaga não encontrada');
+        }
+        if (!job.deleted_at) {
+            throw new BadRequestException('Vaga não está desativada');
+        }
+        await this.repository.restore(id);
+        const restored = await this.repository.findOne({
+            where: { id },
+            select: { id: true, name: true, created_at: true, updated_at: true, deleted_at: true }
+        });
+        return restored;
+    }
+
     async existsBy<T extends keyof Job>(key: T, value: Job[T]) {
         return await this.repository.exists({ where: { [key]: value } });
     }

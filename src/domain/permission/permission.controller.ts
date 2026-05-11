@@ -27,7 +27,7 @@ export class PermissionController {
   @ApiOperation({ summary: 'Listar permissões' })
   @ApiOkResponse({ type: [PermissionDto] })
   @ApiUnauthorizedResponse({ description: 'Token JWT ausente ou inválido' })
-  @Authorization({ resource: Resources.permissions, actions: [Actions.read] })
+  @Authorization({ resource: Resources.permission, actions: [Actions.read] })
   async findAll(@Query() filter: FilterDto) {
     return await this.permissionService.findAll(filter);
   }
@@ -39,7 +39,7 @@ export class PermissionController {
   @ApiBadRequestResponse({ description: 'Permissão não encontrada para o ID informado' })
   @ApiUnauthorizedResponse({ description: 'Token JWT ausente ou inválido' })
   @ApiForbiddenResponse({ description: 'Sem permissão para visualizar permissão' })
-  @Authorization({ resource: Resources.permissions, actions: [Actions.read] })
+  @Authorization({ resource: Resources.permission, actions: [Actions.read] })
   findOne(@Param('id') id: string) {
     return this.permissionService.findOne(+id);
   }

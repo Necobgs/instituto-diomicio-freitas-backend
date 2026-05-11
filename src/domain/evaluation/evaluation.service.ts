@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateEvaluationDto } from './dto/create-evaluation.dto';
 import { UpdateEvaluationDto } from './dto/update-evaluation.dto';
 import { FilterDto } from '../shared/filter/filter-dto';
@@ -90,5 +90,21 @@ export class EvaluationService {
   async remove(id: number) {
     const item = await this.findOneBy('id', id);
     return await this.repository.softRemove(item);
+  }
+
+  async restore(id: number) {
+    const item = await this.repository.findOne({ where: { id }, withDeleted: true, select: { id: true, deleted_at: true } });
+    if (!item) {
+      throw new NotFoundException('Avaliação não encontrada');
+    }
+    if (!item.deleted_at) {
+      throw new BadRequestException('Avaliação não está desativada');
+    }
+    await this.repository.restore(id);
+    const restored = await this.repository.findOne({
+      where: { id },
+      select: { id: true, created_at: true, updated_at: true, deleted_at: true }
+    });
+    return restored;
   }
 }

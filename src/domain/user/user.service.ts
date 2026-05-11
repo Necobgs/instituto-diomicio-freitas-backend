@@ -25,7 +25,6 @@ export class UserService {
     private readonly repository: UserRepository,
     private readonly configService: ConfigService,
     private readonly emailService: EmailService,
-    private readonly jwtService: JwtService,
     private readonly eventEmitter: EventEmitter2,
   ) { }
 
@@ -131,6 +130,22 @@ export class UserService {
     return await this.repository.softRemove(user);
   }
 
+  async restore(id: number) {
+    const user = await this.repository.findOne({ where: { id }, withDeleted: true, select: { id: true, deleted_at: true } });
+    if (!user) {
+      throw new NotFoundException('Usuário não encontrado');
+    }
+    if (!user.deleted_at) {
+      throw new BadRequestException('Usuário não está desativado');
+    }
+    await this.repository.restore(id);
+    const restoredUser = await this.repository.findOne({
+      where: { id },
+      select: { id: true, username: true, email: true, cpf: true, mustChangePassword: true, created_at: true, updated_at: true, deleted_at: true }
+    });
+    return restoredUser;
+  }
+
   async resetPassword(dto: ResetPasswordDto) {
     const user = await this.repository.findOne({
       where: {
@@ -150,7 +165,7 @@ export class UserService {
     }
 
     await this.repository.update(user.id, {
-      password: await encryptPassword(dto.newPassword),
+      password: dto.newPassword,
       mustChangePassword: false,
       tokenPasswordChange: null
     });
@@ -240,6 +255,9 @@ export class UserService {
       );
     }
 
+    console.log(qb.getQueryAndParameters());
+    console.log((await qb.getRawOne()) !== undefined);
+    console.log(await qb.getRawOne());
     return (await qb.getRawOne()) !== undefined;
   }
 

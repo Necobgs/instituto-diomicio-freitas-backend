@@ -26,37 +26,44 @@ export class UserController {
 
   @ApiOperation({ summary: 'Retrieve all users' })
   @Get()
-  @Authorization({ resource: Resources.users, actions: [Actions.read] })
+  @Authorization({ resource: Resources.user, actions: [Actions.read] })
   findAll(@Query() dto: FilterDto) {
     return this.userService.findAll(dto);
   }
 
   @ApiOperation({ summary: 'Retrieve a single user by ID' })
   @Get(':id')
-  @Authorization({ resource: Resources.users, actions: [Actions.read] })
+  @Authorization({ resource: Resources.user, actions: [Actions.read] })
   findOne(@Param('id') id: string) {
     return this.userService.findOneBy('id', +id);
   }
 
   @ApiOperation({ summary: 'Retrieve a single user by ID' })
   @Get(':id/permissions')
-  @Authorization({ resource: Resources.users, actions: [Actions.read] })
+  @Authorization({ resource: Resources.user, actions: [Actions.read] })
   findPermissions(@Param('id') id: string) {
     return this.userService.getUserPermissions(+id);
   }
 
   @ApiOperation({ summary: 'Update an existing user by ID' })
   @Patch(':id')
-  @Authorization({ resource: Resources.users, actions: [Actions.update] })
+  @Authorization({ resource: Resources.user, actions: [Actions.update] })
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.update(+id, updateUserDto);
   }
 
   @ApiOperation({ summary: 'Delete a user by ID' })
   @Delete(':id')
-  @Authorization({ resource: Resources.users, actions: [Actions.delete] })
+  @Authorization({ resource: Resources.user, actions: [Actions.delete] })
   remove(@Param('id') id: string) {
     return this.userService.remove(+id);
+  }
+
+  @ApiOperation({ summary: 'Restore a user by ID' })
+  @Patch(':id/restore')
+  @Authorization({ resource: Resources.user, actions: [Actions.restore] })
+  restore(@Param('id') id: string) {
+    return this.userService.restore(+id);
   }
 
   @ApiOperation({ summary: 'Change password with bearer token' })
@@ -68,7 +75,7 @@ export class UserController {
 
   @ApiOperation({ summary: 'Reset user password to default and require change on next login' })
   @Post(':id/reset-to-default-password')
-  @Authorization({ resource: Resources.users, actions: [Actions.update] })
+  @Authorization({ resource: Resources.user, actions: [Actions.update] })
   resetToDefaultPassword(@Param('id') id: string) {
     return this.userService.resetToDefaultPassword(+id);
   }

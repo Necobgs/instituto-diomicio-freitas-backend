@@ -42,6 +42,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         [context.getHandler(), context.getClass()],
       );
 
+    console.log(`requiredPermissions: ${JSON.stringify(requiredPermissions)}`);
 
     // 2️ Se não exige permissão, só JWT já basta
     if (!requiredPermissions?.length) return true;

@@ -61,4 +61,13 @@ export class ReferralController {
   remove(@Param('id') id: string) {
     return this.referralService.remove(+id);
   }
+
+  @Patch(':id/restore')
+  @Authorization({
+    resource: Resources.referral,
+    actions: [Actions.restore]
+  })
+  restore(@Param('id') id: string) {
+    return this.referralService.restore(+id);
+  }
 }

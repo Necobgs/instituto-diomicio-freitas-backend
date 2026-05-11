@@ -18,7 +18,7 @@ export const Actions: iAction[] = [
         identifier: 'delete',
     },
     {
-        name: 'Todas as ações',
-        identifier: 'all',
+        name: 'Restaurar',
+        identifier: 'restore',
     },
 ]

@@ -48,4 +48,11 @@ export class MonitoringController {
   remove(@Param('id') id: string) {
     return this.monitoringService.remove(+id);
   }
+
+  @ApiOperation({ summary: 'Restore monitoring record by ID' })
+  @Patch(':id/restore')
+  @Authorization({ resource: Resources.monitoring, actions: [Actions.restore] })
+  restore(@Param('id') id: string) {
+    return this.monitoringService.restore(+id);
+  }
 }

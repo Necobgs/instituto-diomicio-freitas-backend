@@ -43,4 +43,10 @@ export class JobController {
     remove(@Param('id') id: string) {
         return this.jobService.remove(+id);
     }
+
+    @Patch(':id/restore')
+    @Authorization({ resource: Resources.job, actions: [Actions.restore] })
+    restore(@Param('id') id: string) {
+        return this.jobService.restore(+id);
+    }
 }

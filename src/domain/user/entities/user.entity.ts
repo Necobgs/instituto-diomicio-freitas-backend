@@ -1,4 +1,4 @@
-import { BeforeInsert, Column, Entity, JoinTable, ManyToMany } from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, Entity, JoinTable, ManyToMany } from "typeorm";
 import { AggregateRoot } from "../../shared/aggregate-root";
 import { encryptPassword } from "../../../utils/encrypt-password";
 import { Permission } from "../../permission/entities/permission.entity";
@@ -43,6 +43,7 @@ export class User extends AggregateRoot {
     tokenPasswordChangeExpiresAt!: Date | null;
 
     @BeforeInsert()
+    @BeforeUpdate()
     async hash_password() {
         this.password = await encryptPassword(this.password)
     }

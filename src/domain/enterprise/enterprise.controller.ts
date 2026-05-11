@@ -48,4 +48,11 @@ export class EnterpriseController {
   remove(@Param('id') id: string) {
     return this.enterpriseService.remove(+id);
   }
+
+  @ApiOperation({ summary: 'Restore enterprise by ID' })
+  @Patch(':id/restore')
+  @Authorization({ resource: Resources.enterprise, actions: [Actions.restore] })
+  restore(@Param('id') id: string) {
+    return this.enterpriseService.restore(+id);
+  }
 }

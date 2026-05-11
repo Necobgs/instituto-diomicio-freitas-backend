@@ -61,4 +61,20 @@ export class EnterpriseService {
     const item = await this.findOneBy('id', id);
     return await this.repository.softRemove(item);
   }
+
+  async restore(id: number) {
+    const item = await this.repository.findOne({ where: { id }, withDeleted: true, select: { id: true, deleted_at: true } });
+    if (!item) {
+      throw new NotFoundException('Empresa não encontrada');
+    }
+    if (!item.deleted_at) {
+      throw new BadRequestException('Empresa não está desativada');
+    }
+    await this.repository.restore(id);
+    const restored = await this.repository.findOne({
+      where: { id },
+      select: { id: true, name: true, cnpj: true, phone: true, created_at: true, updated_at: true, deleted_at: true }
+    });
+    return restored;
+  }
 }

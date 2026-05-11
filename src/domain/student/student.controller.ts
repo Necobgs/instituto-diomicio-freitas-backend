@@ -48,4 +48,11 @@ export class StudentController {
   remove(@Param('id') id: string) {
     return this.studentService.remove(+id);
   }
+
+  @ApiOperation({ summary: 'Restore student by ID' })
+  @Patch(':id/restore')
+  @Authorization({ resource: Resources.student, actions: [Actions.restore] })
+  restore(@Param('id') id: string) {
+    return this.studentService.restore(+id);
+  }
 }

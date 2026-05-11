@@ -78,4 +78,20 @@ export class StudentService {
 
     return await this.repository.softRemove(student);
   }
+
+  async restore(id: number) {
+    const student = await this.repository.findOne({ where: { id }, withDeleted: true, select: { id: true, deleted_at: true } });
+    if (!student) {
+      throw new NotFoundException('Aluno não encontrado');
+    }
+    if (!student.deleted_at) {
+      throw new BadRequestException('Aluno não está desativado');
+    }
+    await this.repository.restore(id);
+    const restored = await this.repository.findOne({
+      where: { id },
+      select: { id: true, name: true, phone: true, created_at: true, updated_at: true, deleted_at: true }
+    });
+    return restored;
+  }
 }

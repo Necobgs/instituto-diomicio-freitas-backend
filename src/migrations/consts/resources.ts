@@ -19,6 +19,18 @@ export const Resources: iResource[] = [
     },
     {
         name: 'Permissões',
-        identifier: 'permissions',
+        identifier: 'permission',
+    },
+    {
+        name: 'Cargos',
+        identifier: 'job',
+    },
+    {
+        name: 'Avaliação',
+        identifier: 'evaluation',
+    },
+    {
+        name: 'Encaminhamento',
+        identifier: 'referral',
     },
 ]

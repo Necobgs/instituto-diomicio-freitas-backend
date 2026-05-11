@@ -167,4 +167,20 @@ export class ReferralService {
     }
     return await this.repository.softRemove(referral);
   }
+
+  async restore(id: number) {
+    const referral = await this.repository.findOne({ where: { id }, withDeleted: true, select: { id: true, deleted_at: true } });
+    if (!referral) {
+      throw new NotFoundException('Encaminhamento não encontrado');
+    }
+    if (!referral.deleted_at) {
+      throw new BadRequestException('Encaminhamento não está desativado');
+    }
+    await this.repository.restore(id);
+    const restored = await this.repository.findOne({
+      where: { id },
+      select: { id: true, created_at: true, updated_at: true, deleted_at: true }
+    });
+    return restored;
+  }
 }

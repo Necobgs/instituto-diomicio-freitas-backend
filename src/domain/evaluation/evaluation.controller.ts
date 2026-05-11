@@ -48,4 +48,11 @@ export class EvaluationController {
   remove(@Param('id') id: string) {
     return this.evaluationService.remove(+id);
   }
+
+  @ApiOperation({ summary: 'Restore evaluation by ID' })
+  @Patch(':id/restore')
+  @Authorization({ resource: Resources.evaluation, actions: [Actions.restore] })
+  restore(@Param('id') id: string) {
+    return this.evaluationService.restore(+id);
+  }
 }
