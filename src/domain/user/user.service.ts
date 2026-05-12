@@ -178,8 +178,9 @@ export class UserService {
   @OnEvent('password.change.request')
   async sendPasswordChangeEmail(dto: PasswordChangeRequestDto) {
     try {
-      const user = await this.repository.findOneBy({
-        email: dto.email,
+      const user = await this.repository.findOne({
+        where: { email: dto.email },
+        select: { id: true, email: true, password: true, tokenPasswordChange: true, tokenPasswordChangeExpiresAt: true }
       });
 
       if (!user) {
