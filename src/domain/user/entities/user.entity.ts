@@ -43,7 +43,6 @@ export class User extends AggregateRoot {
     tokenPasswordChangeExpiresAt!: Date | null;
 
     @BeforeInsert()
-    @BeforeUpdate()
     async hash_password() {
         this.password = await encryptPassword(this.password)
     }

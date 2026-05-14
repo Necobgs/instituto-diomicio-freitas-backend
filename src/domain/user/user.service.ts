@@ -165,7 +165,7 @@ export class UserService {
     }
 
     await this.repository.update(user.id, {
-      password: dto.newPassword,
+      password: await encryptPassword(dto.newPassword),
       mustChangePassword: false,
       tokenPasswordChange: null
     });
@@ -256,9 +256,7 @@ export class UserService {
       );
     }
 
-    console.log(qb.getQueryAndParameters());
-    console.log((await qb.getRawOne()) !== undefined);
-    console.log(await qb.getRawOne());
+    (await qb.getRawOne());
     return (await qb.getRawOne()) !== undefined;
   }
 
